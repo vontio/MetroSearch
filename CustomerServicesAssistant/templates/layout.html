@@ -1,0 +1,39 @@
+﻿{% extends "bootstrap/base.html" %}
+{% block metas %}
+{{ super() }}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+{% endblock %}
+{% block title %}{% block subtitle %}{% endblock %} - 护花呤顾问论坛{% endblock %}
+{% block styles %}
+{{ super() }}
+<link rel="shortcut icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
+<link rel="icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" type="text/css" href="/static/stylesheets/site.css" />
+{% endblock %}
+{% block navbar %}
+{% include 'navbar.html' %}
+{% endblock %}
+{% block content %}
+<div class="container">
+{% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="alert alert-{{ category }}">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message }}
+    </div>
+{% endfor %}
+{% block page_content %}
+{% endblock %}
+<footer>
+    <p>&copy; {{ moment().format('YYYY') }} - 护花呤</p>
+</footer>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{{ moment.lang('zh-CN') }}
+<script src="//cdn.bootcss.com/modernizr/2.8.3/modernizr.min.js"></script>
+<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+{% endblock %}
