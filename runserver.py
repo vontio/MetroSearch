@@ -3,7 +3,7 @@ This script runs the Management application using a development server.
 """
 
 from os import environ
-from CustomerServicesAssistant import app
+from MetroRouteFinder import app
 
 if __name__ == '__main__':
     DEBUG = environ.get("SVR_DEBUG", False)
@@ -12,6 +12,6 @@ if __name__ == '__main__':
     #     PORT = int(environ.get('SVR_PORT', '5555'))
     # except ValueError:
     #     PORT = 5555
-    PORT = 48482
+    PORT = 63876
     DEBUG = True
-    app.run(HOST, PORT, debug = DEBUG)
+    app.run(HOST, PORT, debug=DEBUG)

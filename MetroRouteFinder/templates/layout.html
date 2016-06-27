@@ -5,12 +5,12 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 {% endblock %}
-{% block title %}{% block subtitle %}{% endblock %} - 护花呤顾问论坛{% endblock %}
+{% block title %}{% block subtitle %}{% endblock %} - 地铁时间估算工具{% endblock %}
 {% block styles %}
 {{ super() }}
 <link rel="shortcut icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
 <link rel="icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
-<link rel="stylesheet" type="text/css" href="/static/stylesheets/site.css" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/site.css') }}" />
 {% endblock %}
 {% block navbar %}
 {% include 'navbar.html' %}
@@ -26,7 +26,9 @@
 {% block page_content %}
 {% endblock %}
 <footer>
-    <p>&copy; {{ moment().format('YYYY') }} - 护花呤</p>
+<br />
+<p>声明：本程序的时间估计是以狐狸的步速为标准。</p>
+    <p><span class="glyphicon glyphicon-copyright-mark"></span> {{ moment().format('YYYY') }} - 李瀚明</p>
 </footer>
 </div>
 {% endblock %}
@@ -34,6 +36,4 @@
 {{ super() }}
 {{ moment.include_moment() }}
 {{ moment.lang('zh-CN') }}
-<script src="//cdn.bootcss.com/modernizr/2.8.3/modernizr.min.js"></script>
-<script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
 {% endblock %}
