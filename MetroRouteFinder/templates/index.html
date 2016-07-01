@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block subtitle %}首页{% endblock %}
+{% block page_content %}
+<div class="jumbotron">
+  <h1>地铁最短路径寻找工具</h1>
+  <p>一个搜索地铁路径的工具。支持不同运营商（如东京 JR、都营、私铁）和虚拟换乘（上海和香港）。</p>
+</div>
+	<div id="paths" class="row">
+	{% for city in Cities %}
+	<div class="col-md-1 col-sm-2 col-xs-3"><a class="btn btn-default" href="{{url_for('City', City = city)}}" role="button">{{city}}</a></div>
+	{% endfor%}
+	</div>
+{% endblock %}
