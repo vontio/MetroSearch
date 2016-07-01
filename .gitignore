@@ -304,3 +304,4 @@ ENV/
 
 *.json
 tmp/
+data/Auto-Generated/

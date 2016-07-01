@@ -13,7 +13,7 @@
 				<ul id="fromList" class="dropdown-menu dropdown-menu-right"><li><a>暂无提示</a></li></ul>
 			</div>
 		</div>
-		<br />
+		<br>
 		<div class="input-group">
 			<span class="input-group-addon"><b>到</b></span>
 			<input type="text" id="toInput" oninput="showTips('to')" class="form-control" required="required", autocomplete="off", autofocus="autofocus">
@@ -22,28 +22,18 @@
 				<ul id="toList" class="dropdown-menu dropdown-menu-right"><li><a>暂无提示</a></li></ul>
 			</div>
 		</div>
-		<br />
+		<br>
 		<div class="btn-group btn-group-justified" role="group">
-			<div class="btn-group" role="group"><button id="submit" class="btn btn-success" type="button" onclick="Find($('#fromInput').val(), $('#toInput').val(), 0);">普通</button></div>
-			<div class="btn-group" role="group"><button id="peak" class="btn btn-warning" type="button" onclick="Find($('#fromInput').val(), $('#toInput').val(), 1);">高峰</button></div>
-			<div class="btn-group" role="group"><button id="peak" class="btn btn-warning" type="button" onclick="">单程票</button></div>
-			<div class="btn-group" role="group"><button id="clear" class="btn btn-danger" type="button" onclick="">清空输入</button></div>
+			<div class="btn-group" role="group"><button id="submit" class="btn btn-success" type="button" onclick="find('Normal')">寻找路线</button></div>
 		</div>
 	</div>
 	<br />
-	<div id="content">
-		<ul class="list-group" id="paths">
-			<li class="list-group-item">Cras justo odio</li>
-			<li class="list-group-item">Dapibus ac facilisis in</li>
-			<li class="list-group-item">Morbi leo risus</li>
-			<li class="list-group-item">Porta ac consectetur ac</li>
-			<li class="list-group-item">Vestibulum at eros</li>
-		</ul>
+	<div id="paths" class="row">
 	</div>
 {% endblock %}
 {% block scripts %}
 	{{super()}}
-	<script type="text/javascript">$(function(){init(getURLParam("City"))});</script>
+	<script type="text/javascript">$(function(){init()});</script>
 	<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tips.js') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tools.js') }}"></script>
+	<!--<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tools.js') }}"></script>-->
 {% endblock %}

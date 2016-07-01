@@ -7,10 +7,11 @@
 {% endblock %}
 {% block title %}{% block subtitle %}{% endblock %} - 地铁时间估算工具{% endblock %}
 {% block styles %}
-{{ super() }}
+{{super()}}
 <link rel="shortcut icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
 <link rel="icon" href="https://lihanming.me/static/favicon.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/site.css') }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheets/bootstrap.css') }}" />
 {% endblock %}
 {% block navbar %}
 {% include 'navbar.html' %}
@@ -27,7 +28,6 @@
 {% endblock %}
 <footer>
 <br />
-<p>声明：本程序的时间估计是以狐狸的步速为标准。</p>
     <p><span class="glyphicon glyphicon-copyright-mark"></span> {{ moment().format('YYYY') }} - 李瀚明</p>
 </footer>
 </div>

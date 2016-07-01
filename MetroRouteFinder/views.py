@@ -18,53 +18,29 @@ moment = Moment(app)
 
 
 @app.route('/', methods=[u'GET'])
-def index():
+@app.route('/<string:City>/', methods=[u'GET'])
+def index(City=u"Guangzhou"):
     form = RouteForm()
-    try:
-        City = request.args[u"City"]
-    except:
-        City = u"Guangzhou"
     results = []
     return render_template('city.html', form=form, results=results, City=City)
 
-
-@app.route('/', methods=[u'POST'])
-@app.route('/list/', methods=[u'GET'])
-def datadealing():
+@app.route('/<string:City>/list/', methods=[u'GET'])
+@app.route('/<string:City>/', methods=[u'POST'])
+def datadealing(City=u"Guangzhou"):
     Mode = request.args["Mode"]
-    City = request.args["City"]
-    return jsonify(dataProcess(Mode=Mode, City=City))
+    k = dataProcess(Mode, City)
+    return jsonify(k if Mode != u"rawJson" else {u"rawJson":k})
+
+@app.route('/<string:City>/Line/', methods=[u'GET', u'POST'])
+@app.route('/<string:City>/Line/<string:Line>/', methods=[u'GET', u'POST'])
+def Line(City = u"Guangzhou", Line=u"1"):
+    return jsonify(getLine(City, Line))
 
 
-@app.route('/getLine/', methods=[u'GET', u'POST'])
-def Line():
-    try:
-        City = request.args[u"City"]
-        lineName = request.args[u"lineName"]
-    except:
-        City = u"Guangzhou"
-        lineName = u"1"
-    return jsonify(getLine(City, lineName))
+@app.route('/<string:City>/Direction/<string:From>/<string:To>/', methods=[u'GET', u'POST'])
+def sameLine2(City = u"Guangzhou", From=u"体育西路", To=u"广州东站"):
+    return jsonify({"Lines": sameLine(City, From, To)})
 
-
-@app.route('/sameLine/', methods=[u'GET', u'POST'])
-@app.route('/getDirection/', methods=[u'GET', u'POST'])
-def sameLine2():
-    try:
-        City = request.args[u"City"]
-        From = request.args[u"from"]
-        To = request.args[u"to"]
-        return jsonify({"Lines": sameLine(City, From, To)})
-    except:
-        return jsonify({"Lines": sameLine(u"Guangzhou", u"公园前", u"东山口")})
-
-@app.route('/Route/', methods=[u'GET', u'POST'])
-def RouteSearch():
-    try:
-        City = request.args[u"City"]
-        From = request.args[u"from"]
-        To = request.args[u"to"]
-        Peak = request.args[u"peak"]
-        return jsonify({"Routes": getRoute(City, From, To, Peak)})
-    except:
-        return jsonify({"Routes": getRoute()})
+@app.route('/<string:City>/Route/<string:From>/<string:To>/', methods=[u'GET', u'POST'])
+def RouteSearch(City = u"Guangzhou", From=u"体育西路", To=u"广州东站"):
+    return jsonify(getRoute(City, From, To))
