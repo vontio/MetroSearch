@@ -12,7 +12,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
             {% for item in lista %}
-            <li><a href="{{ url_for('index', City=item) }}">{{item}}</a></li>
+            <li><a href="{{ url_for('City', City=item) }}">{{item}}</a></li>
             {% endfor %}
             </ul>
         </div>
