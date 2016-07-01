@@ -10,13 +10,11 @@ def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
     if Mode != "rawJson":
         try:
             k = json.load(open(filename))
-            # print u"命中" + filename
         except:
             k = eval(Mode)(City)
             file = open(filename, "w")
             file.write(json.dumps(k))
             file.close()
-            # print u"未命中" + filename
         return k
     else:
         return json.load(open(u"./data/{City}.json".format(City=City)))
@@ -26,7 +24,8 @@ def getLine(City, lineName):
     rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
     for Line in rawJsonFile:
         if Line["Name"] == lineName:
-            Line["System"] = City + u"地铁"
+            if "System" not in Line:
+                Line["System"] = City + u"地铁"
             return Line
     return {}
 
@@ -38,14 +37,12 @@ def getStation(City, stationName):
     return {}
 
 
-def sameLine(City, From, To, Mode=u"All"):
+def sameLine(City, From, To, system=u"All"):
     Lines = []
-    # print From, To
-    # print getStation(City, From)
     for Line in getStation(City, From)["Lines"]:
         if Line in getStation(City, To)["Lines"]:
-            if Mode != u"All":
-                if getLine(City, Line)["System"] == Mode:
+            if system != u"All":
+                if getLine(City, Line)["System"] == system:
                     Lines.append({"Line": Line,
                                   "System": getLine(City,Line)["System"],
                                   "Distance": getDirection(City, Line, From, To)[1],
@@ -57,13 +54,16 @@ def sameLine(City, From, To, Mode=u"All"):
                               "Direction": getDirection(City, Line, From, To)[0]})
     # return Lines
     ClearedLine = []
-    Minimum = Lines[0]["Distance"]
-    for Line in Lines:
-        Minimum = Line["Distance"] if (Minimum > Line["Distance"]) else Minimum
-    for Line in Lines:
-        if Line["Distance"] == Minimum:
-            ClearedLine.append(Line)
-    return ClearedLine
+    try:
+        Minimum = Lines[0]["Distance"]
+        for Line in Lines:
+            Minimum = Line["Distance"] if (Minimum > Line["Distance"]) else Minimum
+        for Line in Lines:
+            if Line["Distance"] == Minimum:
+                ClearedLine.append(Line)
+        return ClearedLine
+    except:
+        return Lines
 
 
 def getDirection(City, lineName, From, To):
@@ -200,21 +200,11 @@ def Write_Distance(City, Mode):
     filename = u"./cache/DistanceArray_{Mode}_{City}.json".format(City=City, Mode=Mode)
     try:
         k = json.load(open(filename))
-        # print u"命中" + filename
     except:
         k = Raw_Write_Distance(City, Mode)
         file = open(filename, "w")
         file.write(json.dumps(k))
         file.close()
-        # print u"未命中" + filename
-
-    # k = cache.get(filename)
-    # if k is None:
-    #     k = Raw_Write_Distance(City, Peak, SJT)
-    #     cache.set(filename, k, timeout=86400)
-    #     print u"距离缓存未命中"
-    # else:
-    #     print u"距离缓存命中"
     return k
 
 
@@ -239,7 +229,6 @@ def Raw_Write_Distance(City, Mode):
                 Distance[i][j] = distanceTable[u"无"]
             else:
                 Distance[i][j] = distanceTable[Array[i][j]]
-    # print u"距离写入完成"
     length = Distance
     path = [[i for j in range(Stations_Count)] for i in range(Stations_Count)]
     for k in range(Stations_Count):
@@ -249,7 +238,6 @@ def Raw_Write_Distance(City, Mode):
                 if (length[i][j] > length[i][k] + length[k][j]):
                     length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
                     path[i][j] = path[k][j]  # 并将路径设为K点
-    # print u"数据初始化完成"
     return [length, path]
 
 
@@ -314,7 +302,6 @@ def Print_Result(Station_List, City, Mode="Normal"):
             # 以上代码执行删除非“路线改变”车站，可直接删除
             if Path[i] not in CleanedPath:
                 CleanedPath.append(Path[i])
-    # print u"建立路线完成"
     return CleanedPath
 
 
@@ -334,12 +321,12 @@ def Bulid_List(City, Route, Mode, SystemName):
     return Print_Result(Station_List, City, Mode)
 
 
-def generateDict(Paths, City, Mode="All"):
+def generateDict(Paths, City, system="All"):
     Deal = [[] for item in Paths]
     for line in Paths:
         for i in xrange(0, len(line) - 1):
             Deal[Paths.index(line)].append(
-                sameLine(City, line[i], line[i + 1], Mode))
+                sameLine(City, line[i], line[i + 1], system))
     return [{u"Stations": Paths[i], u"Lines": Deal[i]} for i in xrange(len(Paths))]
 
 
@@ -361,7 +348,7 @@ def getRoute(City, From, To):
     rawJsonFile = dataProcess("rawJson", City)["Lines"]
     for line in rawJsonFile:
         try:
-            LineSystem = Line[u'System']
+            LineSystem = line[u'System']
         except:
             LineSystem = City + u"地铁"
         if LineSystem not in Systems:
@@ -370,7 +357,6 @@ def getRoute(City, From, To):
         for system in Systems:
             a = generateDict(
                 Bulid_List(City, [From, To], u"一票到底", system), City, system)
-            print a
             for element in a:
                 if element["Lines"] != []:
                     if element not in routes:
