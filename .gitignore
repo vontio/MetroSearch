@@ -302,7 +302,6 @@ ENV/
 .ropeproject
 
 
-*.json
 tmp/
 cache/
 
