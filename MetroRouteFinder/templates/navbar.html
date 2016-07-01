@@ -1,4 +1,4 @@
-<div class="navbar navbar-inverse navbar-static-top" role="navigation">
+<div class="navbar navbar-default" role="navigation">
     <div class="container">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -7,15 +7,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <a href="{{ url_for('index') }}" class="navbar-brand">地铁时间估算工具</a>
+            <a href="{{ url_for('index') }}" class="navbar-brand">{{ City }}地铁时间估算</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-            <li><a href="{{ url_for('index', City='Guangzhou') }}">广州</a></li>
-            <li><a href="{{ url_for('index', City='Shanghai') }}">上海</a></li>
-            <li><a href="{{ url_for('index', City='Shenzhen') }}">深圳</a></li>
-            <li><a href="{{ url_for('index', City='Beijing') }}">北京</a></li>
-            <li><a href="{{ url_for('index', City='Hong Kong') }}">香港</a></li>
+            {% for item in lista %}
+            <li><a href="{{ url_for('index', City=item) }}">{{item}}</a></li>
+            {% endfor %}
             </ul>
         </div>
     </div>

@@ -6,6 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from MetroRouteFinder import app
 from forms import RouteForm
+import os
 from data import dataProcess, getLine, sameLine, getRoute
 app.config["SECRET_KEY"] = 'Jason & Tiffany'
 
@@ -20,9 +21,19 @@ moment = Moment(app)
 @app.route('/', methods=[u'GET'])
 @app.route('/<string:City>/', methods=[u'GET'])
 def index(City=u"Guangzhou"):
+    list_dirs = os.walk("./data") 
+    lista = []
+    for root, dirs, files in list_dirs:  
+        for f in files: 
+            lista.append(f.replace(".json", "").decode("GBK"))
+    print lista
+    try:
+        for attention in dataProcess("rawJson", City)["Attention"]:
+            flash(attention, "warning")
+    except:
+        a = 0
     form = RouteForm()
-    results = []
-    return render_template('city.html', form=form, results=results, City=City)
+    return render_template('city.html', form=form, lista=lista, City=City)
 
 @app.route('/<string:City>/list/', methods=[u'GET'])
 @app.route('/<string:City>/', methods=[u'POST'])

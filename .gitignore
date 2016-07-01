@@ -304,4 +304,6 @@ ENV/
 
 *.json
 tmp/
-data/Auto-Generated/
+cache/
+
+.vscode/
