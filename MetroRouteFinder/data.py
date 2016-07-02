@@ -1,9 +1,5 @@
 # coding:utf-8
-from werkzeug.contrib.cache import SimpleCache
 import json
-cache = SimpleCache()
-
-
 def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
     filename = u"./cache/{City}_{Mode}.json".format(
         City=City, Mode=Mode)
@@ -18,8 +14,6 @@ def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
         return k
     else:
         return json.load(open(u"./data/{City}.json".format(City=City)))
-
-
 def getLine(City, lineName):
     rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
     for Line in rawJsonFile:
@@ -28,15 +22,11 @@ def getLine(City, lineName):
                 Line["System"] = City + u"地铁"
             return Line
     return {}
-
-
 def getStation(City, stationName):
     for Station in dataProcess(City=City, Mode="allStations")[u"Stations"]:
         if Station[u"Name"] == stationName:
             return Station
     return {}
-
-
 def sameLine(City, From, To, system=u"All"):
     Lines = []
     for Line in getStation(City, From)["Lines"]:
@@ -64,8 +54,6 @@ def sameLine(City, From, To, system=u"All"):
         return ClearedLine
     except:
         return Lines
-
-
 def getDirection(City, lineName, From, To):
     LineObject = getLine(City, lineName)
     fromIndex = LineObject["Stations"].index(From)
@@ -87,16 +75,12 @@ def getDirection(City, lineName, From, To):
     else:
         direction = LineObject["Stations"][-1 if k > 0 else 0]
     return [direction, abs(k)]
-
-
 def lineColors(City):
     a = {}
     for Line in dataProcess(City=City, Mode="rawJson")["Lines"]:
         a[Line["Name"]] = {u"Color": Line[u"Color"] if u"Color" in Line else u"",
                            u"ShortName": Line[u"ShortName"] if u"ShortName" in Line else Line[u"Name"]}
     return a
-
-
 def allStations(City):
     a = []  # 存储名称
     b = []  # 存储线路列表
@@ -138,8 +122,6 @@ def allStations(City):
     allStationsList = [{u"Name": a[i], u"Lines": b[i], u"Neighbors": c[i], u"Systems": d[i]}
                        for i in xrange(len(a))]
     return {"Stations": allStationsList}
-
-
 def InfoCardArray(City):
     JsonFile = dataProcess(City=City, Mode="rawJson")
     Data = JsonFile["Lines"]
@@ -193,8 +175,6 @@ def InfoCardArray(City):
         InfoCard[i][u'Terminal'] = (
             Array[i].count(u"车") == 1 and Array[i].count(u"同") <= 1)
     return {u"InfoCard": InfoCard, u"Array": Array}
-
-
 def Write_Distance(City, Mode):
     # filename = u"DistanceArray_{Peak}{SJT}{City}".format(City=City, Peak=Peak,SJT=SJT)
     filename = u"./cache/DistanceArray_{Mode}_{City}.json".format(City=City, Mode=Mode)
@@ -206,8 +186,6 @@ def Write_Distance(City, Mode):
         file.write(json.dumps(k))
         file.close()
     return k
-
-
 def Raw_Write_Distance(City, Mode):
     ConfigFile = json.load(open("./config.json"))["Mode"]
     if Mode in ConfigFile:
@@ -239,16 +217,10 @@ def Raw_Write_Distance(City, Mode):
                     length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
                     path[i][j] = path[k][j]  # 并将路径设为K点
     return [length, path]
-
-
 def getInfoCard(City):
     return dataProcess(City=City, Mode="InfoCardArray")["InfoCard"]
-
-
 def getArray(City, Mode="Normal"):
     return Write_Distance(City, Mode)
-
-
 def Route_Find(Station_List, City, Mode="Normal"):
     InfoCard = getInfoCard(City)
     k = getArray(City, Mode)
@@ -265,8 +237,6 @@ def Route_Find(Station_List, City, Mode="Normal"):
         Length.append(All_Length[b[0]][b[1]])
         Path.append(List[::-1])
     return [Length, Path]
-
-
 def VirtualTransfers(City):
     try:
         virtual = dataProcess(City=City, Mode="rawJson")["VirtualTransfers"]
@@ -282,7 +252,6 @@ def VirtualTransfers(City):
     return {"VirtualTransfers": virtual,
             "Transfers": transfer,
             "VirtualTransfersRemind": u"出站换乘"}
-
 def Print_Result(Station_List, City, Mode="Normal"):
     Route = Route_Find(Station_List, City, Mode)
     InfoCard = getInfoCard(City)
@@ -300,6 +269,17 @@ def Print_Result(Station_List, City, Mode="Normal"):
                     del Path[i][j]
                 j = j - 1
             # 以上代码执行删除非“路线改变”车站，可直接删除
+            # 以下代码检测环线分界点
+            j = len(Path[i]) - 2
+            while j > 0:
+                lista = [a["Line"] for a in sameLine(City, Path[i][j], Path[i][j - 1])]
+                listb = [a["Line"] for a in sameLine(City, Path[i][j], Path[i][j + 1])]
+                for item in lista:
+                    if item in listb and "Ring" in getLine(City, item):
+                        Path[i].remove(Path[i][j])
+                        break
+                j = j - 1
+            # 以上代码检测环线分界点
             if Path[i] not in CleanedPath:
                 CleanedPath.append(Path[i])
     return CleanedPath
