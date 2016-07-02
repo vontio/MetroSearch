@@ -12,8 +12,6 @@ app.config["SECRET_KEY"] = 'Jason & Tiffany'
 
 # Bootstrap 支持
 bootstrap = Bootstrap(app)
-# Bootstrap 支持
-# 用户时间本地化工作
 moment = Moment(app)
 # 用户时间本地化工作
 List = []
