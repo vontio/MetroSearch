@@ -1,1 +1,1 @@
-{%extends "layout.html"%}{%block page_content%}<div class="jumbotron"><h1>地铁找路助手</h1><p>在下方选择一个城市开始。</p></div><nav>{%for City in Cities%}<a class="btn btn-info btn-lg CityList" href="{{url_for('City',City=City)}}">{{City}}</a>{%endfor%}</nav>{%endblock%}
+{%extends "layout.html"%}{%block page_content%}<div class="jumbotron"><h1>地铁助手</h1><p>一个用来寻找路径的小工具。</p><p>在下方选择一个城市开始。</p></div><nav>{%for City in Cities%}<a class="btn btn-info btn-lg CityList" href="{{url_for('City',City=City)}}">{{City}}</a>{%endfor%}</nav>{%endblock%}
