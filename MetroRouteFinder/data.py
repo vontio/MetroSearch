@@ -140,10 +140,7 @@ def allStations(City):
     allStationsList = [{u"Name": a[i], u"Lines": b[i],
                         u"Neighbors": c[i], u"Systems": d[i]}
                        for i in xrange(len(a))]
-    p = VirtualTransfers(City)
-    return {"Stations": allStationsList, "Lines": lineColors(City),
-            "VirtualTransfers": p["VirtualTransfers"],
-            "Transfers": p["Transfers"]}
+    return {"Stations": allStationsList, "Lines": lineColors(City)}
 
 
 def VirtualTransfers(City):
@@ -158,7 +155,6 @@ def VirtualTransfers(City):
                     if systema != systemb:
                         transfer.append([station["Name"], systema, systemb])
     return {"VirtualTransfers": virtual, "Transfers": transfer}
-
 
 def InfoCardArray(City):
     JsonFile = dataProcess(City=City, Mode="rawJson")
