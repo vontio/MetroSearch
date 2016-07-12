@@ -304,5 +304,6 @@ ENV/
 
 tmp/
 cache/
+MetroRouteFinder/static/scripts/ga.js
 
 .vscode/
