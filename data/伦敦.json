@@ -4,5 +4,10 @@
         "Name": "Bakerloo",
         "ShortName": "B",
         "Color": "#894E24"
+    }, {
+        "Stations": ["Leytonstone", "Leyton", "Stratford", "Mile End", "Bethnal Green", "Liverpool Street", "Bank", "St Paul's", "Chancery Lane", "Holborn", "Tottenham Court Road", "Oxford Circus", "Bond Street", "Marble Arch", "Lancaster Gate", "Queensway", "Notting Hill Gate", "Holland Park", "Shepherd's Bush", "White City", "East Acton", "North Acton"],
+        "Name": "Central",
+        "ShortName": "C",
+        "Color": "#DC241F"
     }]
 }
