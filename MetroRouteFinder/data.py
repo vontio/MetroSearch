@@ -3,9 +3,9 @@ import json
 
 
 def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
-    filename = u"./cache/{City}_{Mode}.json".format(
-        City=City, Mode=Mode)
     if Mode != "rawJson":
+        filename = u"./cache/{City}_{Mode}.json".format(
+            City=City, Mode=Mode)
         try:
             k = json.load(open(filename))
         except:
@@ -37,19 +37,23 @@ def getStation(City, stationName):
 
 def sameLine(City, From, To, system=u"All"):
     Lines = []
-    for Line in getStation(City, From)["Lines"]:
-        if Line in getStation(City, To)["Lines"]:
-            if system != u"All":
-                if getLine(City, Line)["System"] == system:
-                    Lines.append({"Line": Line,
-                                  "System": getLine(City, Line)["System"],
-                                  "Distance": getDirection(City, Line, From, To)[1],
-                                  "Direction": getDirection(City, Line, From, To)[0]})
-            else:
-                Lines.append({"Line": Line,
-                              "System": getLine(City, Line)["System"],
-                              "Distance": getDirection(City, Line, From, To)[1],
-                              "Direction": getDirection(City, Line, From, To)[0]})
+    for Line in (set(getStation(City, From)["Lines"]) &
+                 set(getStation(City, To)["Lines"])):
+        if system != u"All":
+            if getLine(City, Line)["System"] == system:
+                Lines.append(
+                    {"Line": Line,
+                     "System": getLine(City, Line)["System"],
+                     "Distance": getDirection(City, Line,
+                                              From, To)[1],
+                     "Direction": getDirection(City, Line,
+                                               From, To)[0]})
+        else:
+            Lines.append(
+                {"Line": Line,
+                 "System": getLine(City, Line)["System"],
+                 "Distance": getDirection(City, Line, From, To)[1],
+                 "Direction": getDirection(City, Line, From, To)[0]})
     # return Lines
     ClearedLine = []
     try:
@@ -91,8 +95,10 @@ def getDirection(City, lineName, From, To):
 def lineColors(City):
     a = {}
     for Line in dataProcess(City=City, Mode="rawJson")["Lines"]:
-        a[Line["Name"]] = {u"Color": Line[u"Color"] if u"Color" in Line else u"",
-                           u"ShortName": Line[u"ShortName"] if u"ShortName" in Line else Line[u"Name"]}
+        a[Line["Name"]] = {
+            u"Color": Line[u"Color"] if u"Color" in Line else u"",
+            u"ShortName": Line[u"ShortName"] if u"ShortName" in Line else Line[u"Name"]
+        }
     return a
 
 
@@ -103,10 +109,7 @@ def allStations(City):
     d = []
     rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
     for Line in rawJsonFile:
-        try:
-            LineSystem = Line[u'System']
-        except:
-            LineSystem = City + u"地铁"
+        LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
         for Station in Line["Stations"]:
             if Station not in a:
                 a.append(Station)
@@ -134,28 +137,42 @@ def allStations(City):
                 nextStation = Line["Stations"][0]
                 if nextStation not in c[a.index(Station)]:
                     c[a.index(Station)].append(nextStation)
-    allStationsList = [{u"Name": a[i], u"Lines": b[i], u"Neighbors": c[i], u"Systems": d[i]}
+    allStationsList = [{u"Name": a[i], u"Lines": b[i],
+                        u"Neighbors": c[i], u"Systems": d[i]}
                        for i in xrange(len(a))]
-    return {"Stations": allStationsList, "Lines": lineColors(City)}
+    p = VirtualTransfers(City)
+    return {"Stations": allStationsList, "Lines": lineColors(City),
+            "VirtualTransfers": p["VirtualTransfers"],
+            "Transfers": p["Transfers"]}
+
+
+def VirtualTransfers(City):
+    rawJsonFile = dataProcess(City=City, Mode="rawJson")
+    virtual = rawJsonFile[
+        "VirtualTransfers"] if "VirtualTransfers" in rawJsonFile else []
+    transfer = []
+    for station in dataProcess(City=City, Mode="allStations")["Stations"]:
+        if len(station["Systems"]) > 1:
+            for systema in station["Systems"]:
+                for systemb in station["Systems"]:
+                    if systema != systemb:
+                        transfer.append([station["Name"], systema, systemb])
+    return {"VirtualTransfers": virtual, "Transfers": transfer}
 
 
 def InfoCardArray(City):
     JsonFile = dataProcess(City=City, Mode="rawJson")
-    Data = JsonFile["Lines"]
     InfoCard = []
-    for Line in Data:
-        try:
-            LineSystem = Line[u'System']
-        except:
-            LineSystem = City + u"地铁"
+    for Line in JsonFile["Lines"]:
+        LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
         for Station in Line[u'Stations']:
-            InfoCard.append({u'Line':   Line[u'Name'],
+            InfoCard.append({u'Line': Line[u'Name'],
                              u'System': LineSystem,
-                             u'Name':   Station})
+                             u'Name': Station})
         if u'Ring' in Line:
-            InfoCard.append({u'Line':   Line[u'Name'],
+            InfoCard.append({u'Line': Line[u'Name'],
                              u'System': LineSystem,
-                             u'Name':   Line[u'Stations'][0]})
+                             u'Name': Line[u'Stations'][0]})
     length = len(InfoCard)
     Array = [[(u"无" if i != j else u"同") for i in range(length)]
              for j in range(length)]
@@ -178,17 +195,17 @@ def InfoCardArray(City):
         for station in InfoCard:
             if station["Name"] == Name and Line == station["Line"]:
                 return InfoCard.index(station)
-    try:
+    if "VirtualTransfers" in JsonFile:
         for item in JsonFile["VirtualTransfers"]:
             Array[getStationID(item[0], item[1])][
                 getStationID(item[0], item[2])] = u"虚"
             Array[getStationID(item[0], item[2])][
                 getStationID(item[0], item[1])] = u"虚"
-    except:
-        a = 0
     for i in range(len(InfoCard)):
         InfoCard[i][u'Interchange'] = (
-            Array[i].count(u"转") + Array[i].count(u"虚") + Array[i].count(u"换") >= 1)
+            Array[i].count(u"转") +
+            Array[i].count(u"虚") +
+            Array[i].count(u"换") >= 1)
         InfoCard[i][u'Terminal'] = (
             Array[i].count(u"车") == 1 and Array[i].count(u"同") <= 1)
     return {u"InfoCard": InfoCard, u"Array": Array}
@@ -250,7 +267,6 @@ def getArray(City, Mode="Normal"):
 
 
 def Route_Find(Station_List, City, Mode="Normal"):
-    InfoCard = getInfoCard(City)
     k = getArray(City, Mode)
     All_Length = k[0]
     All_Path = k[1]
@@ -265,22 +281,6 @@ def Route_Find(Station_List, City, Mode="Normal"):
         Length.append(All_Length[b[0]][b[1]])
         Path.append(List[::-1])
     return [Length, Path]
-
-
-def VirtualTransfers(City):
-    try:
-        virtual = dataProcess(City=City, Mode="rawJson")["VirtualTransfers"]
-    except:
-        virtual = []
-    transfer = []
-    for station in dataProcess(City=City, Mode="allStations")["Stations"]:
-        if len(station["Systems"]) > 1:
-            for systema in station["Systems"]:
-                for systemb in station["Systems"]:
-                    if systema != systemb:
-                        transfer.append([station["Name"], systema, systemb])
-    return {"VirtualTransfers": virtual,
-            "Transfers": transfer}
 
 
 def Print_Result(Station_List, City, Mode="Normal"):
@@ -325,7 +325,8 @@ def Bulid_List(City, Route, Mode, SystemName):
         for To in InfoCard:
             if ([From[u'Name'], To[u'Name']] == Route):
                 if Mode == u"一票到底":
-                    if From[u'System'] == SystemName and To[u'System'] == SystemName:
+                    if (From[u'System'] == SystemName and
+                            To[u'System'] == SystemName):
                         Station_List.append(
                             [InfoCard.index(From), InfoCard.index(To)])
                 else:
@@ -340,12 +341,14 @@ def generateDict(Paths, City, system="All"):
         for i in xrange(0, len(line) - 1):
             Deal[Paths.index(line)].append(
                 sameLine(City, line[i], line[i + 1], system))
-    return [{u"Stations": Paths[i], u"Lines": Deal[i]} for i in xrange(len(Paths))]
+    return [{u"Stations": Paths[i],
+             u"Lines": Deal[i]} for i in xrange(len(Paths))]
 
 
 def getRoute(City, From, To):
     routes = []
     modes = []
+    # b = [u"站数少", u"换乘少", u"测试"]
     b = [u"站数少", u"换乘少"]
     if "VirtualTransfers" in dataProcess("rawJson", City):
         b.append(u"不出站")
@@ -360,10 +363,7 @@ def getRoute(City, From, To):
     Systems = []
     rawJsonFile = dataProcess("rawJson", City)["Lines"]
     for line in rawJsonFile:
-        try:
-            LineSystem = line[u'System']
-        except:
-            LineSystem = City + u"地铁"
+        LineSystem = line[u'System'] if u'System' in line else City + u"地铁"
         if LineSystem not in Systems:
             Systems.append(LineSystem)
     if len(Systems) > 1:
