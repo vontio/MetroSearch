@@ -1,1 +1,54 @@
-{% extends "layout.html" %}{% block subtitle %}{{ City }}{% endblock %}{% block page_content %}<div class="form-horizontal"><div class="input-group"><span class="input-group-addon"><b>从</b></span><input type="text" id="fromInput" oninput="showTips('from')" class="form-control" required="required", autocomplete="off", autofocus="autofocus"><div class="input-group-btn" id="fromGroup"><button type="button" id="fromButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-menu-down"></span></button><ul id="fromList" class="dropdown-menu dropdown-menu-right"><li><a>暂无提示</a></li></ul></div></div><br><div class="input-group"><span class="input-group-addon"><b>到</b></span><input type="text" id="toInput" oninput="showTips('to')" class="form-control" required="required", autocomplete="off", autofocus="autofocus"><div class="input-group-btn" id="toGroup"><button type="button" id="toButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-menu-down"></span></button><ul id="toList" class="dropdown-menu dropdown-menu-right"><li><a>暂无提示</a></li></ul></div></div><br><div class="btn-group btn-group-justified" role="group"><div class="btn-group" role="group"><button id="submit" class="btn btn-success" type="button" onclick="find('Normal')">寻找路线</button></div></div></div><br /><div id="paths" class="row"></div>{% endblock %}{% block scripts %}{{super()}}<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tips.js') }}"></script><script type="text/javascript">$(function(){init()});</script>{% endblock %}
+{% extends "layout.html" %}
+{% block subtitle %}{{ City }}{% endblock %}
+{% block page_content %}
+	<div class="form-horizontal">
+		<div class="input-group">
+			<span class="input-group-addon"><b>从</b></span>
+			<input type="text" id="fromInput" oninput="showTips('from')" class="form-control" required="required", autocomplete="off", autofocus="autofocus">
+			<div class="input-group-btn" id="fromGroup">
+				<button type="button" id="fromButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span class="glyphicon glyphicon-menu-down">
+				</span>
+				</button>
+				<ul id="fromList" class="dropdown-menu dropdown-menu-right">
+					<li><a>暂无提示</a></li>
+				</ul>
+			</div>
+		</div>
+		<br>
+		<div class="input-group">
+			<span class="input-group-addon"><b>到</b></span>
+			<input type="text" id="toInput" oninput="showTips('to')" class="form-control" required="required", autocomplete="off", autofocus="autofocus">
+			<div class="input-group-btn" id="toGroup">
+				<button type="button" id="toButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				<span class="glyphicon glyphicon-menu-down">
+				</span>
+				</button>
+				<ul id="toList" class="dropdown-menu dropdown-menu-right">
+					<li>
+						<a>暂无提示</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<br>
+		<div class="btn-group btn-group-justified" role="group">
+			<div class="btn-group" role="group">
+				<button id="submit" class="btn btn-success" type="button" onclick="find('Normal')">寻找路线</button>
+			</div>
+		</div>
+	</div>
+	<br />
+	<div id="paths" class="row">
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{super()}}
+	<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tips.js') }}">
+	</script>
+	<script type="text/javascript">
+		$(function(){
+			init()
+		});
+	</script>
+{% endblock %}

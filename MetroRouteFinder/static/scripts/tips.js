@@ -112,13 +112,18 @@ function find(c) {
                             }).html("\u51fa\u7ad9\u6362\u4e58"))
                         }
                     }
-                for (l in PreviousLine)
-                    for (m in NextLine)
+                for (l in PreviousLine) {
+                    for (m in NextLine) {
                         for (n in f =
-                            [StationName, PreviousLine[l].System, NextLine[m].System], h = [StationName, NextLine[m].System, PreviousLine[l].System], Transfers)
-                            if (g = Transfers[n], g.toString() == f.toString() || g.toString() == h.toString()) $("#Route" + a + "Station" + b).html(StationName + " "), $("#Route" + a + "Station" + b).append($("<span>", {
-                                "class": "label label-danger"
-                            }).html("\u8f6c\u4e58"))
+                            [StationName, PreviousLine[l].System, NextLine[m].System], h = [StationName, NextLine[m].System, PreviousLine[l].System], Transfers) {
+                            if (g = Transfers[n], g.toString() == f.toString() || g.toString() == h.toString()) {
+                                $("#Route" + a + "Station" + b).html(StationName + " "), $("#Route" + a + "Station" + b).append($("<span>", {
+                                    "class": "label label-danger"
+                                }).html("\u8f6c\u4e58"));
+                            }
+                        }
+                    }
+                }
             }
         }
     })
