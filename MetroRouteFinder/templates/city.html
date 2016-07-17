@@ -47,27 +47,24 @@
 	<br />
 	<div class="row">
 		<div class="panel-group col-xs-12 col-sm-6 col-md-4" id="walk" role="tablist" aria-multiselectable="true">
-	<div class="panel panel-default">
-		<div id="heading-1" role="tab" class="panel-heading">
-			<h4 class="panel-title">
-			<a href="#collapse-1" role="button" data-toggle="collapse" data-parent="#path-1" aria-controls="collapse-1" class="collapsed" aria-expanded="false">步行到起点（感谢高德地图）</a>
-			</h4>
-		</div>
-		<div id="collapse-1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-1" aria-expanded="false" style="height: 0px;">
-			<div class="panel-body">
-				<div class="embedMap" id="picture"><iframe id="walkMap" height="450" width="500" frameborder="0" style="border:0"></iframe></div>
+			<div class="panel panel-default">
+				<div id="heading-1" role="tab" class="panel-heading">
+					<h4 class="panel-title">
+					<a href="#collapse-1" role="button" data-toggle="collapse" data-parent="#path-1" aria-controls="collapse-1" class="collapsed" aria-expanded="false">步行到起点（感谢高德地图）</a>
+					</h4>
+				</div>
+				<div id="collapse-1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-1" aria-expanded="false" style="height: 0px;">
+					<div class="panel-body">
+						<div class="embedMap" id="picture"><iframe id="walkMap" height="450" width="500" frameborder="0" style="border:0"></iframe></div>
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>
-</div>
 		<span id="paths"></span>
 	</div>
 {% endblock %}
 {% block scripts %}
 	{{super()}}
 	<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tips.js') }}"></script>
-	<script type="text/javascript">
-		$(function(){init();getLocation();
-		});
-	</script>
+	<script type="text/javascript">$(function(){init();});</script>
 {% endblock %}
