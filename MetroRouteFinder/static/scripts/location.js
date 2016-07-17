@@ -32,11 +32,11 @@ function obtainNeighbor(MarsLonLat) {
     dict = {
         key: GaodeKey,
         location: MarsLonLat[0] + "," + MarsLonLat[1],
-        keywords: "地铁站"
+        keywords: "地铁站",
+        radius: 50000
     }
     if (city != "") {
         dict["city"] = city;
-        dict["radius"] = 50000;
     }
     $.get(url, dict, function(data) {
         pois = data["pois"]
@@ -100,10 +100,9 @@ $(function() {
     getLocation();
 });
 
-function resize()
-{
+function resize() {
     a = $("#navbarcontainer").height() + 20;
-    $("body").attr("style", "padding-top: "+ a +"px");
+    $("body").attr("style", "padding-top: " + a + "px");
 }
 
 $(window).resize(resize);
