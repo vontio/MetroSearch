@@ -6,6 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from MetroRouteFinder import app
 from forms import RouteForm
+import urllib, json
 import os
 import sys
 from data import dataProcess, getLine, sameLine, getRoute
@@ -28,7 +29,6 @@ def initialization():
 
 @app.route('/', methods=[u'GET'])
 def index():
-    print List
     return render_template('index.html', Cities=List, lista=List)
 
 

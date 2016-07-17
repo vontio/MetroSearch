@@ -25,8 +25,12 @@ function obtainNeighbor(MarsLonLat) {
         keywords: "地铁站",
     }, function(data) {
         pois = data["pois"]
-        displayNotice(pois[0]["name"].split("(")[0] +
-            pois[0]["cityname"].replace("市", ""));
+        StationName = pois[0]["name"].split("(")[0];
+        CityName = pois[0]["cityname"].replace("市", "");
+        $("#demo").html(CityName + "地铁");
+        $("#demo").append($("<a>", {
+            href: CityName + "\/?From=" + StationName
+        }).html(StationName + "站"));
     });
 }
 
