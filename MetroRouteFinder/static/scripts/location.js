@@ -1,4 +1,5 @@
-var nearestStation, myPosition;
+var nearestStation = [],
+    myPosition = "";
 
 function showLocation(position) {
     EarthLatLon = [position.coords.latitude, position.coords.longitude];
@@ -28,6 +29,11 @@ function obtainStationLocation(StationName) {
     $.get("/Station/" + StationName, function(a) {});
 }
 
+function myPos(string) {
+    $("#" + string + "Input").val(nearestStation[0]);
+    check();
+}
+
 function obtainNeighbor(MarsLonLat) {
     city = $("#CurrentCity").text();
     url = "https://restapi.amap.com/v3/place/around";
@@ -50,12 +56,12 @@ function obtainNeighbor(MarsLonLat) {
             href: CityName,
             "class": "btn btn-info CityList"
         }).html(CityName));
-        $("#demo").append("，最近的地铁站是" + StationName + "站");
+        $("#demo").append("，最近的地铁站是" + StationName);
         $("#fromInput").val(StationName);
         nearestStation[0] = StationName;
         nearestStation[1] = StationLonLat;
         myPosition = MarsLonLat[0] + "," + MarsLonLat[1];
-        showPicture(myPosition, nearestStation[1], nearestStation[0] + "站");
+        showPicture(myPosition, nearestStation[1], nearestStation[0]);
     });
 }
 
@@ -109,5 +115,4 @@ function resize() {
     a = $("#navbarcontainer").height() + 20;
     $("body").attr("style", "padding-top: " + a + "px");
 }
-
 $(window).resize(resize);

@@ -13,19 +13,9 @@ function buildTipsList(c) {
     return a;
 }
 
-function find(c) {
-    if (c == "Reverse") {
-        From = $("#toInput").val();
-        To = $("#fromInput").val();
-    } else {
-        From = $("#fromInput").val();
-        To = $("#toInput").val();
-    }
-    if (From != nearestStation[0])
-    {
-        $("#walk").hide();
-    }
-
+function find() {
+    From = $("#fromInput").val();
+    To = $("#toInput").val();
     $.post("Route/" + From + "/" + To + "/",
         function(a) {
             $("#paths").html("");
@@ -155,7 +145,7 @@ function find(c) {
                 }
             }
         }
-    )
+    );
 }
 
 function init() {
@@ -183,16 +173,25 @@ function init() {
             Transfers = c.Transfers
         });
 }
-
+function walkM()
+{
+    if ($("#fromInput").val() != nearestStation[0]) {
+        $("#walk").hide();
+    } else {
+        $("#walk").show();
+    }
+}
 function showTips(c, a) {
     a = void 0 === a ? 10 : a;
     inputElement = $("#" + c + "Input");
     inputString = inputElement.val();
+    walkM();
     if ("" === inputString || 0 === a) {
         tipStations = "";
     } else {
         tipStations = buildTipsList(inputString);
     }
+
     var b = $("#" + c + "List");
     b.html("");
     if (0 < tipStations.length) {
@@ -208,7 +207,7 @@ function showTips(c, a) {
             k.appendTo(b);
         }
     } else {
-        b.html("<li><a>暂无提示。</a></li>")
+        b.html("<li><a>暂无提示</a></li>")
     };
     if (inputString === "" || a === 0) {
         $("#" + c + "Button").attr("aria-expanded", "false");
@@ -222,4 +221,14 @@ function showTips(c, a) {
 function clearInput() {
     $("#toInput").val("");
     $("#fromInput").val("");
+    $("#paths").html("");
+    $("#walk").hide();
+}
+
+function switchInput() {
+    var From = $("#toInput").val();
+    $("#toInput").val($("#fromInput").val())
+    $("#fromInput").val(From);
+    $("#paths").html("");
+    walkM();
 }
