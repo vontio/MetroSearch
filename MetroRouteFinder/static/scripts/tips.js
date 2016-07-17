@@ -21,6 +21,11 @@ function find(c) {
         From = $("#fromInput").val();
         To = $("#toInput").val();
     }
+    if (From != nearestStation[0])
+    {
+        $("#walk").hide();
+    }
+
     $.post("Route/" + From + "/" + To + "/",
         function(a) {
             $("#paths").html("");

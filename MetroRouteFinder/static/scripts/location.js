@@ -1,3 +1,5 @@
+var nearestStation, myPosition;
+
 function showLocation(position) {
     EarthLatLon = [position.coords.latitude, position.coords.longitude];
     $("#earth").html(EarthLatLon[0] + " " + EarthLatLon[1]);
@@ -50,7 +52,10 @@ function obtainNeighbor(MarsLonLat) {
         }).html(CityName));
         $("#demo").append("，最近的地铁站是" + StationName + "站");
         $("#fromInput").val(StationName);
-        showPicture(MarsLonLat[0] + "," + MarsLonLat[1], StationLonLat, StationName + "站");
+        nearestStation[0] = StationName;
+        nearestStation[1] = StationLonLat;
+        myPosition = MarsLonLat[0] + "," + MarsLonLat[1];
+        showPicture(myPosition, nearestStation[1], nearestStation[0] + "站");
     });
 }
 
