@@ -173,14 +173,15 @@ function init() {
             Transfers = c.Transfers
         });
 }
-function walkM()
-{
+
+function walkM() {
     if ($("#fromInput").val() != nearestStation[0]) {
         $("#walk").hide();
     } else {
         $("#walk").show();
     }
 }
+
 function showTips(c, a) {
     a = void 0 === a ? 10 : a;
     inputElement = $("#" + c + "Input");

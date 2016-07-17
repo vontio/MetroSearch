@@ -106,13 +106,3 @@ function showError(error) {
             break;
     }
 }
-$(function() {
-    resize();
-    getLocation();
-});
-
-function resize() {
-    a = $("#navbarcontainer").height() + 20;
-    $("body").attr("style", "padding-top: " + a + "px");
-}
-$(window).resize(resize);
