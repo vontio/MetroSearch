@@ -6,10 +6,10 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from MetroRouteFinder import app
 from forms import RouteForm
-import urllib, json
+import json
 import os
 import sys
-from data import dataProcess, getLine, sameLine, getRoute
+from data import dataProcess, getLine, sameLine, getStation, getRoute
 app.config["SECRET_KEY"] = 'Jason & Tiffany'
 
 # Bootstrap 支持
@@ -65,3 +65,23 @@ def sameLine2(City, From, To):
            methods=[u'GET', u'POST'])
 def RouteSearch(City, From, To):
     return jsonify(getRoute(City, From, To))
+
+
+@app.route('/<string:City>/Location/<string:StationName>/<string:MarsLat>/<string:MarsLon>/',
+           methods=[u'GET', u'POST'])
+def addLocation(City, StationName, MarsLat, MarsLon):
+    a = dataProcess(City=City, Mode="allStations")
+    for station in a[u"Stations"]:
+        if station["Name"] == StationName:
+            station["MarsLat"] = MarsLat
+            station["MarsLon"] = MarsLon
+    file = open(u"./cache/{City}_allStations.json".format(
+        City=City), "w")
+    file.write(json.dumps(a))
+    file.close()
+    return getStationPP(City, StationName)
+
+@app.route('/<string:City>/Station/<string:StationName>/',
+           methods=[u'GET', u'POST'])
+def getStationPP(City, StationName):
+    return jsonify(getStation(City, StationName))

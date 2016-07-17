@@ -96,7 +96,7 @@ def lineColors(City):
     a = {}
     for Line in dataProcess(City=City, Mode="rawJson")["Lines"]:
         a[Line["Name"]] = {
-            u"Color": Line[u"Color"] if u"Color" in Line else u"",
+            u"Color": Line[u"Color"] if u"Color" in Line else u"000000",
             u"ShortName": Line[u"ShortName"] if u"ShortName" in Line else Line[u"Name"]
         }
     return a
@@ -107,6 +107,8 @@ def allStations(City):
     b = []  # 存储线路列表
     c = []
     d = []
+    e = []
+    f = []
     rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
     for Line in rawJsonFile:
         LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
@@ -137,6 +139,7 @@ def allStations(City):
                 nextStation = Line["Stations"][0]
                 if nextStation not in c[a.index(Station)]:
                     c[a.index(Station)].append(nextStation)
+
     allStationsList = [{u"Name": a[i], u"Lines": b[i],
                         u"Neighbors": c[i], u"Systems": d[i]}
                        for i in xrange(len(a))]
@@ -155,6 +158,7 @@ def VirtualTransfers(City):
                     if systema != systemb:
                         transfer.append([station["Name"], systema, systemb])
     return {"VirtualTransfers": virtual, "Transfers": transfer}
+
 
 def InfoCardArray(City):
     JsonFile = dataProcess(City=City, Mode="rawJson")
@@ -374,3 +378,5 @@ def getRoute(City, From, To):
                     else:
                         modes[routes.index(element)].append(system)
     return {"Routes": routes, "Modes": modes}
+
+

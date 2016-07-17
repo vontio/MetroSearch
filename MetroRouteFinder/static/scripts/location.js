@@ -1,7 +1,29 @@
-
 function showLocation(position) {
-    EarthLatLon = [position.coords.latitude, position.coords.longitude]
+    EarthLatLon = [position.coords.latitude, position.coords.longitude];
+    $("#earth").html(EarthLatLon[0] + " " + EarthLatLon[1]);
     toMars(EarthLatLon);
+}
+
+function showPicture(start, end, endName) {
+    var url = "https://m.amap.com/navi/?";
+    url += ("start=" + start);
+    url += ("&dest=" + end);
+    url += ("&destName=" + endName);
+    url += ("&naviby=bus&key=" + DisplayKey);
+    $("#walkMap").attr({
+        src: url
+    });
+}
+
+function obtainStationLocation(StationName) {
+    city = $("#CurrentCity").text();
+    url = "http://restapi.amap.com/v3/geocode/geo"
+    dict = {
+        key: GaodeKey,
+        address: StationName + "地铁站",
+        city: city
+    }
+    $.get("/Station/" + StationName, function(a) {});
 }
 
 function obtainNeighbor(MarsLonLat) {
@@ -19,6 +41,7 @@ function obtainNeighbor(MarsLonLat) {
     $.get(url, dict, function(data) {
         pois = data["pois"]
         StationName = pois[0]["name"].split("(")[0];
+        StationLonLat = pois[0]["location"]
         CityName = pois[0]["cityname"].replace("市", "");
         $("#demo").html("您当前位于");
         $("#demo").append($("<a>", {
@@ -27,6 +50,7 @@ function obtainNeighbor(MarsLonLat) {
         }).html(CityName));
         $("#demo").append("，最近的地铁站是" + StationName + "站");
         $("#fromInput").val(StationName);
+        showPicture(MarsLonLat[0] + "," + MarsLonLat[1], StationLonLat, StationName + "站");
     });
 }
 
@@ -38,12 +62,13 @@ function toMars(EarthLatLon) {
         coordsys: "gps"
     }, function(data) {
         MarsLonLat = data["locations"].split(",");
+        $("#mars").html(MarsLonLat[1] + " " + MarsLonLat[0]);
         obtainNeighbor(MarsLonLat);
     });
 }
 
 function displayNotice(string) {
-    $("#demo").html(string);
+    $("#status").html(string);
 }
 
 function getLocation() {

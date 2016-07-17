@@ -13,12 +13,6 @@ function buildTipsList(c) {
     return a;
 }
 
-
-function clear() {
-    $("#toInput").val();
-    $("#fromInput").val();
-}
-
 function find(c) {
     if (c == "Reverse") {
         From = $("#toInput").val();
@@ -118,7 +112,6 @@ function find(c) {
                         role: "tablist",
                         "aria-multiselectable": "true"
                     }).html(ListElement));
-
                 for (var b = 2; b < Route.Stations.length + Route.Lines.length - 2; b += 2) {
                     StationName = Route.Stations[b / 2];
                     PreviousLine = Route.Lines[(b - 2) / 2];
@@ -219,4 +212,9 @@ function showTips(c, a) {
         $("#" + c + "Button").attr("aria-expanded", "true");
         $("#" + c + "Group").attr("class", "input-group-btn open");
     }
-};
+}
+
+function clearInput() {
+    $("#toInput").val("");
+    $("#fromInput").val("");
+}
