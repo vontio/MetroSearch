@@ -14,4 +14,6 @@ if __name__ == '__main__':
     #     PORT = 5555
     PORT = 63876
     DEBUG = True
-    app.run(HOST, PORT, debug=DEBUG)
+    context = ("C:\users\jason\JasonLee.test.crt",
+               "C:\users\jason\JasonLee.test.key")
+    app.run(HOST, PORT, debug=DEBUG, ssl_context=context)
