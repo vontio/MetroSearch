@@ -115,8 +115,7 @@ $(window).resize(resize);
 $(function() {
     resize();
     getLocation();
-    if ($("#CurrentCity").text() != "")
-    {
+    if ($("#CurrentCity").text() != "") {
         init();
     }
 });
