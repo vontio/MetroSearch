@@ -57,6 +57,7 @@ function obtainNeighbor(MarsLonLat) {
             "class": "btn btn-info CityList"
         }).html(CityName));
         $("#demo").append("，最近的地铁站是" + StationName);
+        $("#status").html("获取成功");
         $("#fromInput").val(StationName);
         $("#location").html(CityName + "市" + StationName + "站附近");
         nearestStation[0] = StationName;
