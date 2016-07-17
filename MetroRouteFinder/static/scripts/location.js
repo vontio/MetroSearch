@@ -11,9 +11,7 @@ function getLocation() {
 }
 
 function showLocation(position) {
-    lat = position.coords.latitude;
-    lon = position.coords.longitude;
-    EarthLatLon = [lat, lon]
+    EarthLatLon = [position.coords.latitude, position.coords.longitude]
     toMars(EarthLatLon);
 }
 
@@ -27,10 +25,12 @@ function obtainNeighbor(MarsLonLat) {
         pois = data["pois"]
         StationName = pois[0]["name"].split("(")[0];
         CityName = pois[0]["cityname"].replace("市", "");
-        $("#demo").html(CityName + "地铁");
+        $("#demo").html("您当前位于");
         $("#demo").append($("<a>", {
-            href: CityName + "\/?From=" + StationName
-        }).html(StationName + "站"));
+            href: CityName
+        }).html(CityName));
+        $("#demo").append("，最近的地铁站是"+StationName+"站");
+        $("#fromInput").val(StationName);
     });
 }
 
@@ -41,9 +41,7 @@ function toMars(EarthLatLon) {
         locations: EarthLatLon[1] + "," + EarthLatLon[0],
         coordsys: "gps"
     }, function(data) {
-        a = data["locations"].split(",")
-        displayNotice("地球坐标：纬度 " + EarthLatLon[0] + "，经度 " + EarthLatLon[1] + "。火星坐标：纬度 " + a[1] + "，经度 " + a[0] + "。");
-        MarsLonLat = a;
+        MarsLonLat = data["locations"].split(",");
         obtainNeighbor(MarsLonLat);
     });
 }
@@ -51,7 +49,7 @@ function toMars(EarthLatLon) {
 function showError(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
-            displayNotice("您拒绝提供位置信息，因此我们无法提供服务。");
+            displayNotice("您拒绝提供位置信息，因此我们无法为您定位。");
             break;
         case error.POSITION_UNAVAILABLE:
             displayNotice("位置信息暂时不可用。");

@@ -4,7 +4,7 @@
 	<div class="form-horizontal">
 		<div class="input-group">
 			<span class="input-group-addon"><b>从</b></span>
-			<input type="text" id="fromInput" oninput="showTips('from')" class="form-control" required="required", autocomplete="off", autofocus="autofocus">
+			<input type="text" id="fromInput" oninput="showTips('from')" class="form-control" required="required", autocomplete="off">
 			<div class="input-group-btn" id="fromGroup">
 				<button type="button" id="fromButton" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<span class="glyphicon glyphicon-menu-down">
@@ -34,7 +34,11 @@
 		<br>
 		<div class="btn-group btn-group-justified" role="group">
 			<div class="btn-group" role="group">
+				<button id="switch" class="btn btn-warning" type="button" onclick="find('Reverse')">寻找返程</button>
+			</div><div class="btn-group" role="group">
 				<button id="submit" class="btn btn-success" type="button" onclick="find('Normal')">寻找路线</button>
+			</div><div class="btn-group" role="group">
+				<button id="clear" class="btn btn-danger" type="button" onclick="find('Normal')">清除输入</button>
 			</div>
 		</div>
 	</div>

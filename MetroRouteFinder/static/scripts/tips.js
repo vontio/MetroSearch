@@ -14,68 +14,72 @@ function buildTipsList(c) {
 }
 
 function find(c) {
-    From = $("#fromInput").val();
-    To = $("#toInput").val();
+    if (c == "Reverse") {
+        From = $("#toInput").val();
+        To = $("#fromInput").val();
+    } else {
+        From = $("#fromInput").val();
+        To = $("#toInput").val();
+    }
     $.post("Route/" + From + "/" + To + "/",
         function(a) {
             $("#paths").html("");
             Routes = a.Routes;
             Modes = a.Modes;
             for (a = 0; a < Routes.length; a++) {
-                ListElement = $("<div>", {
-                    "class": "panel panel-default"
-                });
-                f = $("<div>", {
-                    id: "heading" + a,
-                    role: "tab",
-                    "class": "panel-heading"
-                });
-                h = $("<h4>", {
-                    "class": "panel-title"
-                });
-                g = $("<a>", {
-                    href: "#collapse" + a,
-                    role: "button",
-                    "data-toggle": "collapse",
-                    "data-parent": "#path" + a,
-                    "aria-expanded": 0 === a ? "true" : "false",
-                    "aria-controls": "collapse" + a
-                }).html("路线 " + (a + 1).toString() + "：");
-                correspondence = {
-                    "站数少": "success",
-                    "换乘少": "primary",
-                    "不出站": "warning",
-                    "一票到底": "info"
-                };
+                var ListElement = $("<div>", {
+                        "class": "panel panel-default"
+                    }),
+                    f = $("<div>", {
+                        id: "heading" + a,
+                        role: "tab",
+                        "class": "panel-heading"
+                    }),
+                    h = $("<h4>", {
+                        "class": "panel-title"
+                    }),
+                    g = $("<a>", {
+                        href: "#collapse" + a,
+                        role: "button",
+                        "data-toggle": "collapse",
+                        "data-parent": "#path" + a,
+                        "aria-expanded": 0 === a ? "true" : "false",
+                        "aria-controls": "collapse" + a
+                    }).html("路线 " + (a + 1).toString() + " "),
+                    correspondence = {
+                        "站数少": "success",
+                        "换乘少": "primary",
+                        "不出站": "warning"
+                    };
                 for (var b = 0; b < Modes[a].length; b++) {
-                    var c = "default";
+                    var c = "info";
                     if (correspondence.hasOwnProperty(Modes[a][b])) {
                         c = correspondence[Modes[a][b]];
                     }
-                    g.append($("<span>", {
-                        "class": "routetype label label-" + c
-                    }).html(Modes[a][b]));
+                    g.append(
+                        $("<span>", {
+                            "class": "routetype label label-" + c
+                        }).html(Modes[a][b])
+                    );
                 }
                 ListElement.append(f.html(h.html(g)));
-
-                d = $("<div>", {
-                    id: "collapse" + a,
-                    "class": "panel-collapse collapse in",
-                    role: "tabpanel",
-                    "aria-labelledby": "heading" + a
-                });
-                e = $("<ul>", {
-                    "class": "list-group"
-                });
-                Route = Routes[a];
-                pre = "Route" + a;
-                for (b = 0; b < Route.Stations.length + Route.Lines.length; b++) {
+                var d = $("<div>", {
+                        id: "collapse" + a,
+                        "class": "panel-collapse collapse in",
+                        role: "tabpanel",
+                        "aria-labelledby": "heading" + a
+                    }),
+                    e = $("<ul>", {
+                        "class": "list-group"
+                    }),
+                    Route = Routes[a],
+                    pre = "Route" + a;
+                for (var b = 0; b < Route.Stations.length + Route.Lines.length; b++) {
                     if (0 == b % 2) {
-                        f = Route.Stations[b / 2],
                         f = $("<li>", {
                             "class": "StationName list-group-item",
                             id: pre + "Station" + b
-                        }).html(f);
+                        }).html(Route.Stations[b / 2]);
                     } else {
                         h = Route.Lines[(b - 1) / 2];
                         f = $("<li>", {
@@ -91,22 +95,11 @@ function find(c) {
                                 id: pre + "Line" + b,
                                 style: "background-color:" + lineColors[g.Line].Color
                             }).html(g.Line));
-                            f.append("往");
                             f.append($("<span>", {
                                 "class": "Direction",
                                 id: pre + "Direction" + b
                             }).html(g.Direction));
-                            f.append("方向，坐 ");
-                            f.append($("<span>", {
-                                "class": "Distance",
-                                id: pre + "Distance" + b
-                            }).html(g.Distance));
-                            f.append(" 站，约 ");
-                            f.append($("<span>", {
-                                "class": "Distance",
-                                id: pre + "Distance" + b
-                            }).html(g.Distance * 3));
-                            f.append(" 分钟");
+                            f.append("方向，" + g.Distance + " 站 " + g.Distance * 3 + " 分钟");
                         }
                     }
                     e.append(f);
@@ -157,7 +150,8 @@ function find(c) {
                     }
                 }
             }
-        })
+        }
+    )
 }
 
 function init() {
