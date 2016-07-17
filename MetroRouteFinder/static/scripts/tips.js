@@ -13,6 +13,12 @@ function buildTipsList(c) {
     return a;
 }
 
+
+function clear() {
+    $("#toInput").val();
+    $("#fromInput").val();
+}
+
 function find(c) {
     if (c == "Reverse") {
         From = $("#toInput").val();
@@ -204,7 +210,7 @@ function showTips(c, a) {
             k.appendTo(b);
         }
     } else {
-        b.html("<li><a>暂无提示。请等候提示加载，或检查您的输入。</a></li>")
+        b.html("<li><a>暂无提示。</a></li>")
     };
     if (inputString === "" || a === 0) {
         $("#" + c + "Button").attr("aria-expanded", "false");

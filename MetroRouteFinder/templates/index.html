@@ -8,7 +8,7 @@
 </div>
 <nav>
 	{%for City in Cities%}
-	<a class="btn btn-info btn-lg CityList" href="{{url_for('City',City=City)}}">
+	<a class="btn btn-info CityList" href="{{url_for('City',City=City)}}">
 		{{City}}
 	</a>
 	{%endfor%}
