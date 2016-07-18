@@ -1,16 +1,1 @@
-﻿.LineName{color:white;background-color:black;}.direction{font-weight:bold;}.routetype{class:label label-default;}a.CityList{margin:5px;}
-
-
-.embedMap {
-    position: relative;
-    padding-bottom: 90%; // (450 ÷ 500 = 0.9 = 90%)
-    height: 0;
-    overflow: hidden;
-}
-.embedMap iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
+﻿.LineName{color:white;background-color:black;}.direction{font-weight:bold;}.routetype{class:labellabel-default;}a.CityList{margin:5px;}.embedMap{position:relative;padding-bottom:90%;height:0;overflow:hidden;}.embedMapiframe{position:absolute;top:0;left:0;width:100%;height:100%;}
