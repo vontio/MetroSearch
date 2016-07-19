@@ -16,6 +16,7 @@ function showPicture(start, end, endName) {
     // $("#walkMap").attr({
     //     src: url
     // });
+    var map = new AMap.Map('walkMap');
 }
 
 function obtainStationLocation(StationName) {
