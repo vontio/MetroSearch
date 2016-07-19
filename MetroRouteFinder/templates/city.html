@@ -71,5 +71,5 @@
 {% endblock %}
 {% block scripts %}
 	{{super()}}
-	<script type="text/javascript" src="{{ url_for('static', filename = 'scripts/tips.js') }}"></script>
+	<script type="text/javascript" async src="{{ url_for('static', filename = 'scripts/tips.js') }}"></script>
 {% endblock %}
