@@ -13,9 +13,9 @@ function showPicture(start, end, endName) {
     url += ("&dest=" + end);
     url += ("&destName=" + endName);
     url += ("&naviby=bus&key=" + DisplayKey);
-    $("#walkMap").attr({
-        src: url
-    });
+    // $("#walkMap").attr({
+    //     src: url
+    // });
 }
 
 function obtainStationLocation(StationName) {
