@@ -8,6 +8,4 @@
 a.CityList{
     margin:5px;
     }
-#walkMap{
-    height:300px;
-}
+#walkMap {width:100%; height: 300px; }  
