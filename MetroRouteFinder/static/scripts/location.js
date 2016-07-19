@@ -8,7 +8,7 @@ function showLocation(position) {
 }
 
 function showPicture(start, end, endName) {
-    $("walkMap").html("");
+    $("#walkMap").html("");
     var map = new AMap.Map('walkMap');
 }
 
