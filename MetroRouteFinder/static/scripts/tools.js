@@ -1,1 +1,0 @@
-function getURLParam(a){var b=new RegExp("(^|&)"+a+"=([^&]*)(&|$)"),c=window.location.search.substr(1).match(b);return null!=c?decodeURI(c[2]):"Guangzhou"}

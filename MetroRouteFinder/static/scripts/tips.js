@@ -1,1 +1,234 @@
-function buildTipsList(a){var b=[];return StationList.forEach(function(c){0<=c.text().indexOf(a)&&b.push(c)}),b}function find(){From=$("#fromInput").val(),To=$("#toInput").val(),$.post("Route/"+From+"/"+To+"/",function(a){var b,c,d,e,f,g,h,i,j,k,l,m,n,o,p;for($("#paths").html(""),Routes=a.Routes,Modes=a.Modes,a=0;a<Routes.length;a++){for(b=$("<div>",{"class":"panel panel-default"}),c=$("<div>",{id:"heading"+a,role:"tab","class":"panel-heading"}),d=$("<h4>",{"class":"panel-title"}),e=$("<a>",{href:"#collapse"+a,role:"button","data-toggle":"collapse","data-parent":"#path"+a,"aria-expanded":0===a?"true":"false","aria-controls":"collapse"+a}).html("路线 "+(a+1).toString()+" "),f={"站数少":"success","换乘少":"primary","不出站":"warning"},g=0;g<Modes[a].length;g++)h="info",f.hasOwnProperty(Modes[a][g])&&(h=f[Modes[a][g]]),e.append($("<span>",{"class":"routetype label label-"+h}).html(Modes[a][g]));for(b.append(c.html(d.html(e))),i=$("<div>",{id:"collapse"+a,"class":"panel-collapse collapse in",role:"tabpanel","aria-labelledby":"heading"+a}),j=$("<ul>",{"class":"list-group"}),k=Routes[a],l="Route"+a,g=0;g<k.Stations.length+k.Lines.length;g++){if(0==g%2)c=$("<li>",{"class":"StationName list-group-item",id:l+"Station"+g}).html(k.Stations[g/2]);else{d=k.Lines[(g-1)/2],c=$("<li>",{"class":"list-group-item"});for(h in d)h>0&&c.append("，或：<br>"),e=d[h],c.append($("<span>",{"class":"LineName",id:l+"Line"+g,style:"background-color:"+lineColors[e.Line].Color}).html(e.Line)),c.append($("<span>",{"class":"Direction",id:l+"Direction"+g}).html(e.Direction)),c.append("方向，"+e.Distance+" 站 "+3*e.Distance+" 分钟")}j.append(c)}for(b.append(i.append(j)),$("#paths").append($("<div>",{"class":"panel-group col-xs-12 col-sm-6 col-md-4",id:"path"+a,role:"tablist","aria-multiselectable":"true"}).html(b)),g=2;g<k.Stations.length+k.Lines.length-2;g+=2){StationName=k.Stations[g/2],PreviousLine=k.Lines[(g-2)/2],NextLine=k.Lines[g/2];for(m in PreviousLine)for(n in NextLine){c=[StationName,PreviousLine[m],NextLine[n]],o=[];for(p in VirtualTransfers)VirtualTransfers[p][0]==c[0]&&o.push(VirtualTransfers[p]);for(p in Transfers)Transfers[p][0]==c[0]&&o.push(Transfers[p]);for(p in o)e=o[p],(e[1]==c[1].Line&&e[2]==c[2].Line||e[1]==c[2].Line&&e[2]==c[1].Line)&&($("#Route"+a+"Station"+g).html(StationName+" "),$("#Route"+a+"Station"+g).append($("<span>",{"class":"label label-warning"}).html("出站换乘"))),(e[1]==c[1].System&&e[2]==c[2].System||e[1]==c[2].System&&e[2]==c[1].System)&&($("#Route"+a+"Station"+g).html(StationName+" "),$("#Route"+a+"Station"+g).append($("<span>",{"class":"label label-danger"}).html("转乘")))}}}})}function init(){$.post("?Mode=allStations",function(a){Stations=a.Stations,lineColors=a.Lines,Stations.forEach(function(a){var b=$("<div>").html($("<span>",{"class":"StationName"}).html(a.Name));a.Lines.forEach(function(a){b.append(" "),b.append($("<span>",{"class":"LineName",style:"background-color:"+lineColors[a].Color}).html(lineColors[a].ShortName))}),StationList.push(b)})}),$.post("?Mode=VirtualTransfers",function(a){VirtualTransfers=a.VirtualTransfers,Transfers=a.Transfers})}function walkM(){$("#fromInput").val()!=nearestStation[0]?$("#walk").hide():$("#walk").show()}function showTips(a,b){var c,d;if(b=void 0===b?10:b,inputElement=$("#"+a+"Input"),inputString=inputElement.val(),walkM(),tipStations=""===inputString||0===b?"":buildTipsList(inputString),c=$("#"+a+"List"),c.html(""),0<tipStations.length)for(d=0;d<Math.min(b,tipStations.length);++d)k=$("<li>").html($("<a>",{href:"#",style:"cursor:pointer",click:function(){inputElement.val($(this).find(".StationName").html()),showTips(a,0)}}).html(tipStations[d])),k.appendTo(c);else c.html("<li><a>暂无提示</a></li>");""===inputString||0===b?($("#"+a+"Button").attr("aria-expanded","false"),$("#"+a+"Group").attr("class","input-group-btn")):($("#"+a+"Button").attr("aria-expanded","true"),$("#"+a+"Group").attr("class","input-group-btn open"))}function clearInput(){$("#toInput").val(""),$("#fromInput").val(""),$("#paths").html(""),$("#walk").hide()}function switchInput(){var a=$("#toInput").val();$("#toInput").val($("#fromInput").val()),$("#fromInput").val(a),$("#paths").html(""),walkM()}var StationList=[],VirtualTransfers=[],Transfers=[],lineColors;
+var StationList = [],
+    VirtualTransfers = [],
+    Transfers = [],
+    lineColors;
+
+function buildTipsList(c) {
+    var a = [];
+    StationList.forEach(function(b) {
+        if (0 <= b.text().indexOf(c)) {
+            a.push(b);
+        }
+    });
+    return a;
+}
+
+function find() {
+    From = $("#fromInput").val();
+    To = $("#toInput").val();
+    $.post("Route/" + From + "/" + To + "/",
+        function(a) {
+            $("#paths").html("");
+            Routes = a.Routes;
+            Modes = a.Modes;
+            for (a = 0; a < Routes.length; a++) {
+                var ListElement = $("<div>", {
+                        "class": "panel panel-default"
+                    }),
+                    f = $("<div>", {
+                        id: "heading" + a,
+                        role: "tab",
+                        "class": "panel-heading"
+                    }),
+                    h = $("<h4>", {
+                        "class": "panel-title"
+                    }),
+                    g = $("<a>", {
+                        href: "#collapse" + a,
+                        role: "button",
+                        "data-toggle": "collapse",
+                        "data-parent": "#path" + a,
+                        "aria-expanded": 0 === a ? "true" : "false",
+                        "aria-controls": "collapse" + a
+                    }).html("路线 " + (a + 1).toString() + " "),
+                    correspondence = {
+                        "站数少": "success",
+                        "换乘少": "primary",
+                        "不出站": "warning"
+                    };
+                for (var b = 0; b < Modes[a].length; b++) {
+                    var c = "info";
+                    if (correspondence.hasOwnProperty(Modes[a][b])) {
+                        c = correspondence[Modes[a][b]];
+                    }
+                    g.append(
+                        $("<span>", {
+                            "class": "routetype label label-" + c
+                        }).html(Modes[a][b])
+                    );
+                }
+                ListElement.append(f.html(h.html(g)));
+                var d = $("<div>", {
+                        id: "collapse" + a,
+                        "class": "panel-collapse collapse in",
+                        role: "tabpanel",
+                        "aria-labelledby": "heading" + a
+                    }),
+                    e = $("<ul>", {
+                        "class": "list-group"
+                    }),
+                    Route = Routes[a],
+                    pre = "Route" + a;
+                for (var b = 0; b < Route.Stations.length + Route.Lines.length; b++) {
+                    if (0 == b % 2) {
+                        f = $("<li>", {
+                            "class": "StationName list-group-item",
+                            id: pre + "Station" + b
+                        }).html(Route.Stations[b / 2]);
+                    } else {
+                        h = Route.Lines[(b - 1) / 2];
+                        f = $("<li>", {
+                            "class": "list-group-item"
+                        });
+                        for (var c in h) {
+                            if (c > 0) {
+                                f.append("，或：<br>");
+                            }
+                            g = h[c];
+                            f.append($("<span>", {
+                                "class": "LineName",
+                                id: pre + "Line" + b,
+                                style: "background-color:" + lineColors[g.Line].Color
+                            }).html(g.Line));
+                            f.append($("<span>", {
+                                "class": "Direction",
+                                id: pre + "Direction" + b
+                            }).html(g.Direction));
+                            f.append("方向，" + g.Distance + " 站 " + g.Distance * 3 + " 分钟");
+                        }
+                    }
+                    e.append(f);
+                }
+                ListElement.append(d.append(e));
+                $("#paths").append(
+                    $("<div>", {
+                        "class": "panel-group col-xs-12 col-sm-6 col-md-4",
+                        id: "path" + a,
+                        role: "tablist",
+                        "aria-multiselectable": "true"
+                    }).html(ListElement));
+                for (var b = 2; b < Route.Stations.length + Route.Lines.length - 2; b += 2) {
+                    StationName = Route.Stations[b / 2];
+                    PreviousLine = Route.Lines[(b - 2) / 2];
+                    NextLine = Route.Lines[b / 2];
+                    for (var l in PreviousLine) {
+                        for (var m in NextLine) {
+                            var f = [StationName, PreviousLine[l], NextLine[m]];
+                            var VT = []
+                            for (var n in VirtualTransfers) {
+                                if (VirtualTransfers[n][0] == f[0]) {
+                                    VT.push(VirtualTransfers[n]);
+                                }
+                            }
+                            for (var n in Transfers) {
+                                if (Transfers[n][0] == f[0]) {
+                                    VT.push(Transfers[n]);
+                                }
+                            }
+                            for (var n in VT) {
+                                g = VT[n];
+                                if ((g[1] == f[1].Line && g[2] == f[2].Line) || (g[1] == f[2].Line && g[2] == f[1].Line)) {
+                                    $("#Route" + a + "Station" + b).html(StationName + " ");
+                                    $("#Route" + a + "Station" + b).append($("<span>", {
+                                        "class": "label label-warning"
+                                    }).html("出站换乘"));
+                                }
+                                if ((g[1] == f[1].System && g[2] == f[2].System) || (g[1] == f[2].System && g[2] == f[1].System)) {
+                                    $("#Route" + a + "Station" + b).html(StationName + " ");
+                                    $("#Route" + a + "Station" + b).append($("<span>", {
+                                        "class": "label label-danger"
+                                    }).html("转乘"));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    );
+}
+
+function init() {
+    $.post("?Mode=allStations",
+        function(c) {
+            Stations = c.Stations;
+            lineColors = c.Lines;
+            Stations.forEach(function(a) {
+                var c = $("<div>").html($("<span>", {
+                    "class": "StationName"
+                }).html(a.Name));
+                a.Lines.forEach(function(a) {
+                    c.append(" ");
+                    c.append($("<span>", {
+                        "class": "LineName",
+                        style: "background-color:" + lineColors[a].Color
+                    }).html(lineColors[a].ShortName));
+                });
+                StationList.push(c);
+            })
+        });
+    $.post("?Mode=VirtualTransfers",
+        function(c) {
+            VirtualTransfers = c.VirtualTransfers;
+            Transfers = c.Transfers
+        });
+}
+
+function walkM() {
+    if ($("#fromInput").val() != nearestStation[0]) {
+        $("#walk").hide();
+    } else {
+        $("#walk").show();
+    }
+}
+
+function showTips(c, a) {
+    a = void 0 === a ? 10 : a;
+    inputElement = $("#" + c + "Input");
+    inputString = inputElement.val();
+    walkM();
+    if ("" === inputString || 0 === a) {
+        tipStations = "";
+    } else {
+        tipStations = buildTipsList(inputString);
+    }
+
+    var b = $("#" + c + "List");
+    b.html("");
+    if (0 < tipStations.length) {
+        for (var q = 0; q < Math.min(a, tipStations.length); ++q) {
+            k = $("<li>").html($("<a>", {
+                href: "#",
+                style: "cursor:pointer",
+                click: function() {
+                    inputElement.val($(this).find(".StationName").html());
+                    showTips(c, 0)
+                }
+            }).html(tipStations[q]));
+            k.appendTo(b);
+        }
+    } else {
+        b.html("<li><a>暂无提示</a></li>");
+    }; if (inputString === "" || a === 0) {
+        $("#" + c + "Button").attr("aria-expanded", "false");
+        $("#" + c + "Group").attr("class", "input-group-btn");
+    } else {
+        $("#" + c + "Button").attr("aria-expanded", "true");
+        $("#" + c + "Group").attr("class", "input-group-btn open");
+    }
+}
+
+function clearInput() {
+    $("#toInput").val("");
+    $("#fromInput").val("");
+    $("#paths").html("");
+    $("#walk").hide();
+}
+
+function switchInput() {
+    var From = $("#toInput").val();
+    $("#toInput").val($("#fromInput").val());
+    $("#fromInput").val(From);
+    $("#paths").html("");
+    walkM();
+}
