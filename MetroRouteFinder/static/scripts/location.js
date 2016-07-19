@@ -8,14 +8,6 @@ function showLocation(position) {
 }
 
 function showPicture(start, end, endName) {
-    var url = "https://m.amap.com/navi/?";
-    url += ("start=" + start);
-    url += ("&dest=" + end);
-    url += ("&destName=" + endName);
-    url += ("&naviby=bus&key=" + DisplayKey);
-    // $("#walkMap").attr({
-    //     src: url
-    // });
     var map = new AMap.Map('walkMap');
 }
 
