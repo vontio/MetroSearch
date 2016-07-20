@@ -43,11 +43,11 @@ def City(City):
 @app.route('/<string:City>/list/', methods=[u'GET'])
 @app.route('/<string:City>/', methods=[u'POST'])
 def datadealing(City):
-    print u"收到请求", request.path, request.args
-    a = time.clock()
+    # print u"收到请求", request.path, request.args
+    # a = time.clock()
     Mode = request.args["Mode"]
     k = dataProcess(Mode, City)
-    print u"用了时间", time.clock() - a
+    # print u"用了时间", time.clock() - a
     return jsonify(k if Mode != u"rawJson" else {u"rawJson": k})
 
 
@@ -66,10 +66,10 @@ def sameLine2(City, From, To):
 @app.route('/<string:City>/Route/<string:From>/<string:To>/',
            methods=[u'GET', u'POST'])
 def RouteSearch(City, From, To):
-    print u"收到请求", request.path, request.args
-    a = time.clock()
+    # print u"收到请求", request.path, request.args
+    # a = time.clock()
     k = getRoute(City, From, To)
-    print u"用了时间", time.clock() - a
+    # print u"用了时间", time.clock() - a
     return jsonify(k)
 
 
