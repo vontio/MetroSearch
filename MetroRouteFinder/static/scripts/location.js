@@ -1,10 +1,10 @@
 var nearestStation = [],
     myPosition = "";
 
-function showLocation(position) {
-    EarthLatLon = [position.coords.latitude, position.coords.longitude];
-    $("#earth").html(EarthLatLon[0] + " " + EarthLatLon[1]);
-    toMars(EarthLatLon);
+function sL(position) {
+    eWJ = [position.coords.latitude, position.coords.longitude];
+    $("#earth").html(eWJ[0] + " " + eWJ[1]);
+    toMars(eWJ);
 }
 
 function showPicture(start, end, endName) {
@@ -23,95 +23,87 @@ function obtainStationLocation(StationName) {
     $.get("/Station/" + StationName, function(a) {});
 }
 
-function myPos(string) {
-    $("#" + string + "Input").val(nearestStation[0]);
-    check();
-}
-
-function obtainNeighbor(MarsLonLat) {
-    city = $("#CurrentCity").text();
+function obtainNeighbor(mJW) {
+    cK = $("#CurrentCity").text();
     url = "https://restapi.amap.com/v3/place/around";
+    mP = mJW[0] + "," + mJW[1];
     dict = {
         key: GaodeKey,
-        location: MarsLonLat[0] + "," + MarsLonLat[1],
+        location: mP,
         keywords: "地铁站",
         radius: 50000
     }
-    if (city != "") {
-        dict["city"] = city;
+    if (cK != "") {
+        dict["city"] = cK;
     }
     $.get(url, dict, function(data) {
         pois = data["pois"]
-        StationName = pois[0]["name"].split("(")[0];
-        StationLonLat = pois[0]["location"]
-        CityName = pois[0]["cityname"].replace("市", "");
+        sN = pois[0]["name"].split("(")[0];
+        cN = pois[0]["cityname"].replace("市", "");
         $("#demo").html("您当前位于");
         $("#demo").append($("<a>", {
-            href: CityName,
+            href: cN,
             "class": "btn btn-info CityList"
-        }).html(CityName));
-        $("#demo").append("，最近的地铁站是" + StationName);
+        }).html(cN));
+        $("#demo").append("，最近的地铁站是" + sN);
         $("#status").html("获取成功");
-        $("#fromInput").val(StationName);
-        $("#location").html(CityName + "市" + StationName + "站附近");
-        nearestStation[0] = StationName;
-        nearestStation[1] = StationLonLat;
-        myPosition = MarsLonLat[0] + "," + MarsLonLat[1];
-        showPicture(myPosition, nearestStation[1], nearestStation[0]);
+        $("#fromInput").val(sN);
+        $("#location").html(cN + "市" + sN + "站附近");
+        showPicture(mP, pois[0]["location"], sN);
     });
 }
 
-function toMars(EarthLatLon) {
+function toMars(eWJ) {
     url = "https://restapi.amap.com/v3/assistant/coordinate/convert";
     $.get(url, {
         key: GaodeKey,
-        locations: EarthLatLon[1] + "," + EarthLatLon[0],
+        locations: eWJ[1] + "," + eWJ[0],
         coordsys: "gps"
     }, function(data) {
-        MarsLonLat = data["locations"].split(",");
-        $("#mars").html(MarsLonLat[1] + " " + MarsLonLat[0]);
-        obtainNeighbor(MarsLonLat);
+        mJW = data["locations"].split(",");
+        $("#mars").html(mJW[1] + " " + mJW[0]);
+        obtainNeighbor(mJW);
     });
 }
 
-function displayNotice(string) {
-    $("#status").html(string);
+function dN(s) {
+    $("#status").html(s);
 }
 
-function getLocation() {
+function gL() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showLocation, showError);
+        navigator.geolocation.getCurrentPosition(sL, sE);
     } else {
-        displayNotice("浏览器不支持定位。");
+        dN("浏览器不支持定位。");
     }
 }
 
-function showError(error) {
+function sE(error) {
     switch (error.code) {
         case error.PERMISSION_DENIED:
-            displayNotice("您拒绝提供位置信息，因此我们无法为您定位。");
+            dN("您拒绝提供位置信息，因此我们无法为您定位。");
             break;
         case error.POSITION_UNAVAILABLE:
-            displayNotice("我们不知道您在哪儿。");
+            dN("我们不知道您在哪儿。");
             break;
         case error.TIMEOUT:
-            displayNotice("暂时无法获得位置信息。");
+            dN("暂时无法获得位置信息。");
             break;
         case error.UNKNOWN_ERROR:
-            displayNotice("发生了无法处理的意外事件。");
+            dN("发生了无法处理的意外事件。");
             break;
     }
 }
 
-function resize() {
+function rS() {
     a = $("#navbarcontainer").height() + 20;
     $("body").attr("style", "padding-top: " + a + "px");
 }
-$(window).resize(resize);
+$(window).resize(rS);
 $(function() {
-    resize();
-    getLocation();
+    rS();
     if ($("#CurrentCity").text() != "") {
         init();
     }
+    gL();
 });

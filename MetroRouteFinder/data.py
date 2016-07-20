@@ -1,21 +1,10 @@
 # coding:utf-8
 import json
-
-
-def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
-    if Mode != "rawJson":
-        filename = u"./cache/{City}_{Mode}.json".format(
-            City=City, Mode=Mode)
-        try:
-            k = json.load(open(filename))
-        except:
-            k = eval(Mode)(City)
-            file = open(filename, "w")
-            file.write(json.dumps(k))
-            file.close()
-        return k
-    else:
-        return json.load(open(u"./data/{City}.json".format(City=City)))
+import numpy
+try:
+    import cPickle as Pickle
+except:
+    import Pickle
 
 
 def getLine(City, lineName):
@@ -41,20 +30,18 @@ def sameLine(City, From, To, system=u"All"):
                  set(getStation(City, To)["Lines"])):
         if system != u"All":
             if getLine(City, Line)["System"] == system:
-                Lines.append(
-                    {"Line": Line,
-                     "System": getLine(City, Line)["System"],
-                     "Distance": getDirection(City, Line,
-                                              From, To)[1],
-                     "Direction": getDirection(City, Line,
-                                               From, To)[0]})
+                Lines.append({"Line": Line,
+                              "System": getLine(City, Line)["System"],
+                              "Distance": getDirection(
+                                  City, Line, From, To)[1],
+                              "Direction": getDirection(
+                                  City, Line, From, To)[0]})
         else:
             Lines.append(
                 {"Line": Line,
                  "System": getLine(City, Line)["System"],
                  "Distance": getDirection(City, Line, From, To)[1],
                  "Direction": getDirection(City, Line, From, To)[0]})
-    # return Lines
     ClearedLine = []
     try:
         Minimum = Lines[0]["Distance"]
@@ -92,23 +79,11 @@ def getDirection(City, lineName, From, To):
     return [direction, abs(k)]
 
 
-def lineColors(City):
-    a = {}
-    for Line in dataProcess(City=City, Mode="rawJson")["Lines"]:
-        a[Line["Name"]] = {
-            u"Color": Line[u"Color"] if u"Color" in Line else u"000000",
-            u"ShortName": Line[u"ShortName"] if u"ShortName" in Line else Line[u"Name"]
-        }
-    return a
-
-
 def allStations(City):
     a = []  # 存储名称
     b = []  # 存储线路列表
     c = []
     d = []
-    e = []
-    f = []
     rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
     for Line in rawJsonFile:
         LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
@@ -125,149 +100,57 @@ def allStations(City):
             linePosition = Line["Stations"].index(Station)
             if (linePosition >= 1):
                 nextStation = Line["Stations"][linePosition - 1]
-                if nextStation not in c[a.index(Station)]:
-                    c[a.index(Station)].append(nextStation)
             elif ("Ring" in Line):
                 nextStation = Line["Stations"][-1]
-                if nextStation not in c[a.index(Station)]:
-                    c[a.index(Station)].append(nextStation)
             if (linePosition < len(Line["Stations"]) - 1):
                 nextStation = Line["Stations"][linePosition + 1]
-                if nextStation not in c[a.index(Station)]:
-                    c[a.index(Station)].append(nextStation)
             elif ("Ring" in Line):
                 nextStation = Line["Stations"][0]
-                if nextStation not in c[a.index(Station)]:
-                    c[a.index(Station)].append(nextStation)
+            if nextStation not in c[a.index(Station)]:
+                c[a.index(Station)].append(nextStation)
 
     allStationsList = [{u"Name": a[i], u"Lines": b[i],
                         u"Neighbors": c[i], u"Systems": d[i]}
                        for i in xrange(len(a))]
-    return {"Stations": allStationsList, "Lines": lineColors(City)}
-
-
-def VirtualTransfers(City):
-    rawJsonFile = dataProcess(City=City, Mode="rawJson")
-    virtual = rawJsonFile[
-        "VirtualTransfers"] if "VirtualTransfers" in rawJsonFile else []
+    lineColors = {}
+    for Line in rawJsonFile:
+        lineColors[Line["Name"]] = {
+            u"Color": Line[u"Color"] if u"Color" in Line else u"#000000",
+            u"ShortName": (Line[u"ShortName"]
+                           if u"ShortName" in Line else Line[u"Name"])
+        }
+    virtual = (rawJsonFile["VirtualTransfers"]
+               if "VirtualTransfers" in rawJsonFile else [])
     transfer = []
-    for station in dataProcess(City=City, Mode="allStations")["Stations"]:
-        if len(station["Systems"]) > 1:
-            for systema in station["Systems"]:
-                for systemb in station["Systems"]:
-                    if systema != systemb:
-                        transfer.append([station["Name"], systema, systemb])
-    return {"VirtualTransfers": virtual, "Transfers": transfer}
-
-
-def InfoCardArray(City):
-    JsonFile = dataProcess(City=City, Mode="rawJson")
-    InfoCard = []
-    for Line in JsonFile["Lines"]:
-        LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
-        for Station in Line[u'Stations']:
-            InfoCard.append({u'Line': Line[u'Name'],
-                             u'System': LineSystem,
-                             u'Name': Station})
-        if u'Ring' in Line:
-            InfoCard.append({u'Line': Line[u'Name'],
-                             u'System': LineSystem,
-                             u'Name': Line[u'Stations'][0]})
-    length = len(InfoCard)
-    Array = [[(u"无" if i != j else u"同") for i in range(length)]
-             for j in range(length)]
-    for i in xrange(length):
-        for j in xrange(length):
-            if (Array[i][j] == u"无"):
-                if (InfoCard[i][u'Name'] == InfoCard[j][u'Name']):
-                    if InfoCard[i][u'Line'] == InfoCard[j][u'Line']:
-                        Array[i][j] = u"同"  # 同站、同线——用于处理环线使用
-                    elif InfoCard[i][u'System'] == InfoCard[j][u'System']:
-                        Array[i][j] = u"换"  # 同站、不同线——说明是换乘站
-                    else:
-                        Array[i][j] = u"转"  # 同站、不同线——说明是换乘站
-                elif ((InfoCard[i][u'Line'] == InfoCard[j][u'Line']) and
-                      ((j == i + 1) or (i == j + 1))):
-                    Array[i][j] = u"车"  # 起点较终点小1、同线，说明是相邻车站
-                Array[j][i] = Array[i][j]
-
-    def getStationID(Name, Line):
-        for station in InfoCard:
-            if station["Name"] == Name and Line == station["Line"]:
-                return InfoCard.index(station)
-    if "VirtualTransfers" in JsonFile:
-        for item in JsonFile["VirtualTransfers"]:
-            Array[getStationID(item[0], item[1])][
-                getStationID(item[0], item[2])] = u"虚"
-            Array[getStationID(item[0], item[2])][
-                getStationID(item[0], item[1])] = u"虚"
-    for i in range(len(InfoCard)):
-        InfoCard[i][u'Interchange'] = (
-            Array[i].count(u"转") +
-            Array[i].count(u"虚") +
-            Array[i].count(u"换") >= 1)
-        InfoCard[i][u'Terminal'] = (
-            Array[i].count(u"车") == 1 and Array[i].count(u"同") <= 1)
-    return {u"InfoCard": InfoCard, u"Array": Array}
+    for s in allStationsList:
+        if len(s["Systems"]) > 1:
+            for a in s["Systems"]:
+                for b in s["Systems"]:
+                    if a != b:
+                        transfer.append([s["Name"], a, b])
+    return {"Stations": allStationsList,
+            "Lines": lineColors,
+            "VirtualTransfers": virtual,
+            "Transfers": transfer}
 
 
 def Write_Distance(City, Mode):
-    # filename = u"DistanceArray_{Peak}{SJT}{City}".format(City=City, Peak=Peak,SJT=SJT)
-    filename = u"./cache/DistanceArray_{Mode}_{City}.json".format(
+    filename = u"./cache/{City}_{Mode}_DistanceArray.dat".format(
         City=City, Mode=Mode)
     try:
-        k = json.load(open(filename))
+        k = Pickle.load(open(filename, 'rb'))
     except:
         k = Raw_Write_Distance(City, Mode)
-        file = open(filename, "w")
-        file.write(json.dumps(k))
-        file.close()
+        Pickle.dump(k, open(filename, "wb"), 1)
     return k
-
-
-def Raw_Write_Distance(City, Mode):
-    ConfigFile = json.load(open("./config.json"))["Mode"]
-    if Mode in ConfigFile:
-        distanceTable = ConfigFile[Mode]
-    else:
-        distanceTable = ConfigFile[u"普通"]
-    Array = dataProcess(City=City, Mode="InfoCardArray")["Array"]
-    InfoCard = dataProcess(City=City, Mode="InfoCardArray")["InfoCard"]
-    Stations_Count = len(Array)
-    Distance = [[distanceTable[u"无"]
-                 for j in range(Stations_Count)]
-                for i in range(Stations_Count)]
-    for i in range(Stations_Count):
-        for j in range(Stations_Count):
-            if (Array[i][j] == u"虚"):
-                Distance[i][j] = distanceTable[
-                    u"无"] if (Mode == u"不出站") else distanceTable[u"换"]
-            elif (Array[i][j] == u"转") and (Mode == u"一票到底"):
-                Distance[i][j] = distanceTable[u"无"]
-            else:
-                Distance[i][j] = distanceTable[Array[i][j]]
-    length = Distance
-    path = [[i for j in range(Stations_Count)] for i in range(Stations_Count)]
-    for k in range(Stations_Count):
-        for i in range(Stations_Count):
-            for j in range(Stations_Count):
-                # 如果既有路径大于经过K点中转的路径
-                if (length[i][j] > length[i][k] + length[k][j]):
-                    length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
-                    path[i][j] = path[k][j]  # 并将路径设为K点
-    return [length, path]
 
 
 def getInfoCard(City):
     return dataProcess(City=City, Mode="InfoCardArray")["InfoCard"]
 
 
-def getArray(City, Mode="Normal"):
-    return Write_Distance(City, Mode)
-
-
 def Route_Find(Station_List, City, Mode="Normal"):
-    k = getArray(City, Mode)
+    k = Write_Distance(City, Mode)
     All_Length = k[0]
     All_Path = k[1]
     Length = []
@@ -290,9 +173,9 @@ def Print_Result(Station_List, City, Mode="Normal"):
     Path = Route[1]
     CleanedPath = []
     for i in xrange(len(Length)):
-        for j in xrange(len(Path[i])):
-            Path[i][j] = InfoCard[Path[i][j]][u'Name']
         if (Length[i] == min(Length)):
+            for j in xrange(len(Path[i])):
+                Path[i][j] = InfoCard[Path[i][j]][u'Name']
             # 以下代码执行删除非“路线改变”车站，可直接删除
             j = len(Path[i]) - 2
             while j > 0:
@@ -380,3 +263,112 @@ def getRoute(City, From, To):
     return {"Routes": routes, "Modes": modes}
 
 
+def InfoCardArray(City):
+    JsonFile = dataProcess(City=City, Mode="rawJson")
+    InfoCard = []
+    for Line in JsonFile["Lines"]:
+        LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
+        for Station in Line[u'Stations']:
+            InfoCard.append({u'Line': Line[u'Name'],
+                             u'System': LineSystem,
+                             u'Name': Station})
+        if u'Ring' in Line:
+            InfoCard.append({u'Line': Line[u'Name'],
+                             u'System': LineSystem,
+                             u'Name': Line[u'Stations'][0]})
+    length = len(InfoCard)
+    Array = {u"Stations": length, u"Items": {
+        u"同": [], u"车": [], u"换": [], u"虚": [], u"转": []}}
+    for i in xrange(length):
+        for j in xrange(length):
+            if (InfoCard[i][u'Name'] == InfoCard[j][u'Name']):
+                if InfoCard[i][u'Line'] == InfoCard[j][u'Line']:
+                    Array[u"Items"][u"同"].append((i, j))  # 同站、同线——用于处理环线使用
+                elif InfoCard[i][u'System'] == InfoCard[j][u'System']:
+                    Array[u"Items"][u"换"].append((i, j))  # 同站、不同线——说明是换乘站
+                    InfoCard[i][u'Interchange'] = True
+                else:
+                    Array[u"Items"][u"转"].append((i, j))  # 同站、不同线——说明是换乘站
+                    InfoCard[i][u'Interchange'] = True
+            elif ((InfoCard[i][u'Line'] == InfoCard[j][u'Line']) and
+                    ((j == i + 1) or (i == j + 1))):
+                Array[u"Items"][u"车"].append((i, j))  # 起点较终点小1、同线，说明是相邻车站
+
+    def getStationID(Name, Line):
+        a = []
+        for s in InfoCard:
+            if (s["Name"] == Name and Line == s["Line"]):
+                a.append(InfoCard.index(s))
+        return a
+
+    if "VirtualTransfers" in JsonFile:
+        for item in JsonFile["VirtualTransfers"]:
+            stationa = getStationID(item[0], item[1])
+            stationb = getStationID(item[0], item[2])
+            for s in stationa:
+                for t in stationb:
+                    Array[u"Items"][u"换"].remove((s, t))
+                    Array[u"Items"][u"换"].remove((t, s))
+                    Array[u"Items"][u"虚"].append((s, t))
+                    Array[u"Items"][u"虚"].append((t, s))
+    for i in xrange(length):
+        count1 = 0
+        for element in Array[u"Items"][u"车"]:
+            if element[0] == i:
+                count1 += 1
+        if count1 == 1:
+            count1 == 0
+            for element in Array[u"Items"][u"同"]:
+                if element[0] == i:
+                    count1 += 1
+            if count1 <= 1:
+                InfoCard[i][u'Terminal'] = True
+    return {u"InfoCard": InfoCard, u"Array": Array}
+
+
+def Raw_Write_Distance(City, Mode):
+    ConfigFile = json.load(open("./config.json"))["Mode"]
+    distanceTable = ConfigFile[Mode if Mode in ConfigFile else u"普通"]
+    Array = dataProcess(City=City, Mode="InfoCardArray")["Array"]
+    Stations_Count = Array["Stations"]
+    Distance = [[distanceTable[u"无"]
+                 for j in range(Stations_Count)]
+                for i in range(Stations_Count)]
+    for item in Array[u"Items"][u"同"]:
+        Distance[item[0]][item[1]] = distanceTable[u"同"]
+    for item in Array[u"Items"][u"车"]:
+        Distance[item[0]][item[1]] = distanceTable[u"车"]
+    for item in Array[u"Items"][u"换"]:
+        Distance[item[0]][item[1]] = distanceTable[u"换"]
+    for item in Array[u"Items"][u"转"]:
+        Distance[item[0]][item[1]] = distanceTable[u"无"] if (
+            Mode == u"一票到底") else distanceTable[u"转"]
+    for item in Array[u"Items"][u"虚"]:
+        Distance[item[0]][item[1]] = distanceTable[u"无"] if (
+            Mode == u"不出站") else distanceTable[u"换"]
+    length = Distance
+    path = [[i for j in range(Stations_Count)] for i in range(Stations_Count)]
+    for k in range(Stations_Count):
+        for i in range(Stations_Count):
+            for j in range(Stations_Count):
+                # 如果既有路径大于经过K点中转的路径
+                if (length[i][j] > length[i][k] + length[k][j]):
+                    length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
+                    path[i][j] = path[k][j]  # 并将路径设为K点
+    return [length, path]
+
+
+def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
+    if Mode != "rawJson":
+        filename = u"./cache/{City}_{Mode}.json".format(
+            City=City, Mode=Mode)
+        try:
+            k = json.load(open(filename))
+        except:
+            k = eval(Mode)(City)
+            file = open(filename, "w")
+            file.write(json.dumps(k))
+            file.close()
+        return k
+    else:
+        return json.load(open(u"./data/{City}.json".format(City=City)))

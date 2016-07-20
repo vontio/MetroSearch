@@ -5,8 +5,8 @@ from flask import render_template, flash, request, \
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from MetroRouteFinder import app
-from forms import RouteForm
 import json
+import time
 import os
 import sys
 from data import dataProcess, getLine, sameLine, getStation, getRoute
@@ -37,15 +37,17 @@ def City(City):
     if "Attention" in dataProcess("rawJson", City):
         for attention in dataProcess("rawJson", City)["Attention"]:
             flash(attention, "warning")
-    form = RouteForm()
-    return render_template('city.html', form=form, lista=List, City=City)
+    return render_template('city.html', lista=List, City=City)
 
 
 @app.route('/<string:City>/list/', methods=[u'GET'])
 @app.route('/<string:City>/', methods=[u'POST'])
 def datadealing(City):
+    print u"收到请求", request.path, request.args
+    a = time.clock()
     Mode = request.args["Mode"]
     k = dataProcess(Mode, City)
+    print u"用了时间", time.clock() - a
     return jsonify(k if Mode != u"rawJson" else {u"rawJson": k})
 
 
@@ -64,7 +66,11 @@ def sameLine2(City, From, To):
 @app.route('/<string:City>/Route/<string:From>/<string:To>/',
            methods=[u'GET', u'POST'])
 def RouteSearch(City, From, To):
-    return jsonify(getRoute(City, From, To))
+    print u"收到请求", request.path, request.args
+    a = time.clock()
+    k = getRoute(City, From, To)
+    print u"用了时间", time.clock() - a
+    return jsonify(k)
 
 
 @app.route('/<string:City>/Location/<string:StationName>/<string:MarsLat>/<string:MarsLon>/',

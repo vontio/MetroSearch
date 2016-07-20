@@ -1,7 +1,7 @@
 var StationList = [],
     VirtualTransfers = [],
     Transfers = [],
-    lineColors;
+    lineColors = [];
 
 function buildTipsList(c) {
     var a = [];
@@ -153,6 +153,8 @@ function init() {
         function(c) {
             Stations = c.Stations;
             lineColors = c.Lines;
+            VirtualTransfers = c.VirtualTransfers;
+            Transfers = c.Transfers;
             Stations.forEach(function(a) {
                 var c = $("<div>").html($("<span>", {
                     "class": "StationName"
@@ -166,11 +168,6 @@ function init() {
                 });
                 StationList.push(c);
             })
-        });
-    $.post("?Mode=VirtualTransfers",
-        function(c) {
-            VirtualTransfers = c.VirtualTransfers;
-            Transfers = c.Transfers
         });
 }
 
