@@ -1,10 +1,9 @@
 # coding:utf-8
 import json
-import numpy
 try:
-    import cPickle as Pickle
+    import cPickle as pickle
 except:
-    import Pickle
+    import pickle
 
 
 def getLine(City, lineName):
@@ -80,11 +79,9 @@ def getDirection(City, lineName, From, To):
 
 
 def allStations(City):
-    a = []  # 存储名称
-    b = []  # 存储线路列表
-    c = []
-    d = []
-    rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
+    a, b, c, d = [], [], [], []  # 存储名称
+    rawK = dataProcess(City=City, Mode="rawJson")
+    rawJsonFile = rawK["Lines"]
     for Line in rawJsonFile:
         LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
         for Station in Line["Stations"]:
@@ -119,8 +116,7 @@ def allStations(City):
             u"ShortName": (Line[u"ShortName"]
                            if u"ShortName" in Line else Line[u"Name"])
         }
-    virtual = (rawJsonFile["VirtualTransfers"]
-               if "VirtualTransfers" in rawJsonFile else [])
+    virtual = (rawK["VirtualTransfers"] if "VirtualTransfers" in rawK else [])
     transfer = []
     for s in allStationsList:
         if len(s["Systems"]) > 1:
@@ -138,10 +134,10 @@ def Write_Distance(City, Mode):
     filename = u"./cache/{City}_{Mode}_DistanceArray.dat".format(
         City=City, Mode=Mode)
     try:
-        k = Pickle.load(open(filename, 'rb'))
+        k = pickle.load(open(filename, 'rb'))
     except:
         k = Raw_Write_Distance(City, Mode)
-        Pickle.dump(k, open(filename, "wb"), 1)
+        pickle.dump(k, open(filename, "wb"), 1)
     return k
 
 
@@ -172,32 +168,33 @@ def Print_Result(Station_List, City, Mode="Normal"):
     Length = Route[0]
     Path = Route[1]
     CleanedPath = []
-    for i in xrange(len(Length)):
+    for i in xrange(len(Path)):
+        b = Path[i]
         if (Length[i] == min(Length)):
-            for j in xrange(len(Path[i])):
-                Path[i][j] = InfoCard[Path[i][j]][u'Name']
+            for j in xrange(len(b)):
+                b[j] = InfoCard[b[j]][u'Name']
             # 以下代码执行删除非“路线改变”车站，可直接删除
-            j = len(Path[i]) - 2
+            j = len(b) - 2
             while j > 0:
-                if (Path[i][j] != Path[i][j - 1]):
-                    del Path[i][j]
+                if (b[j] != b[j - 1]):
+                    del b[j]
                 j = j - 1
             # 以上代码执行删除非“路线改变”车站，可直接删除
             # 以下代码检测环线分界点
-            j = len(Path[i]) - 2
+            j = len(b) - 2
             while j > 0:
                 lista = [a["Line"]
-                         for a in sameLine(City, Path[i][j], Path[i][j - 1])]
+                         for a in sameLine(City, b[j], b[j - 1])]
                 listb = [a["Line"]
-                         for a in sameLine(City, Path[i][j], Path[i][j + 1])]
+                         for a in sameLine(City, b[j], b[j + 1])]
                 for item in lista:
                     if item in listb and "Ring" in getLine(City, item):
-                        Path[i].remove(Path[i][j])
+                        del b[j]
                         break
                 j = j - 1
             # 以上代码检测环线分界点
-            if Path[i] not in CleanedPath:
-                CleanedPath.append(Path[i])
+            if b not in CleanedPath:
+                CleanedPath.append(b)
     return CleanedPath
 
 
@@ -229,37 +226,31 @@ def generateDict(Paths, City, system="All"):
 
 
 def getRoute(City, From, To):
-    routes = []
-    modes = []
+    k = dataProcess("rawJson", City)
     # b = [u"站数少", u"换乘少", u"测试"]
     b = [u"站数少", u"换乘少"]
-    if "VirtualTransfers" in dataProcess("rawJson", City):
+    if "VirtualTransfers" in k:
         b.append(u"不出站")
-    for mode in b:
-        a = generateDict(Bulid_List(City, [From, To], mode, " "), City)
-        for element in a:
-            if element not in routes:
-                routes.append(element)
-                modes.append([mode])
-            else:
-                modes[routes.index(element)].append(mode)
-    Systems = []
-    rawJsonFile = dataProcess("rawJson", City)["Lines"]
-    for line in rawJsonFile:
+    c = [(mode, mode, u"All") for mode in b]
+    routes, modes, Systems = [], [], []
+    for line in k["Lines"]:
         LineSystem = line[u'System'] if u'System' in line else City + u"地铁"
         if LineSystem not in Systems:
             Systems.append(LineSystem)
     if len(Systems) > 1:
         for system in Systems:
-            a = generateDict(
-                Bulid_List(City, [From, To], u"一票到底", system), City, system)
-            for element in a:
-                if element["Lines"] != []:
-                    if element not in routes:
-                        routes.append(element)
-                        modes.append([system])
-                    else:
-                        modes[routes.index(element)].append(system)
+            c.append((u"一票到底", system, system))
+    for item in c:
+        a = generateDict(Bulid_List(City, [From, To],
+                                    item[0], item[1]),
+                         City, item[2])
+        for element in a:
+            if element["Lines"] != []:
+                if element not in routes:
+                    routes.append(element)
+                    modes.append([item[1]])
+                else:
+                    modes[routes.index(element)].append(item[1])
     return {"Routes": routes, "Modes": modes}
 
 
@@ -369,6 +360,6 @@ def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):
             file = open(filename, "w")
             file.write(json.dumps(k))
             file.close()
-        return k
     else:
-        return json.load(open(u"./data/{City}.json".format(City=City)))
+        k = json.load(open(u"./data/{City}.json".format(City=City)))
+    return k

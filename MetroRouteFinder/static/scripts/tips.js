@@ -14,11 +14,9 @@ function buildTipsList(c) {
 }
 
 function find() {
-    From = $("#fromInput").val();
-    To = $("#toInput").val();
-    $.post("Route/" + From + "/" + To + "/",
+    $("#paths").html("");
+    $.post("Route/" + $("#fromInput").val() + "/" + $("#toInput").val() + "/",
         function(a) {
-            $("#paths").html("");
             Routes = a.Routes;
             Modes = a.Modes;
             for (a = 0; a < Routes.length; a++) {
@@ -94,7 +92,7 @@ function find() {
                                 "class": "Direction",
                                 id: pre + "Direction" + b
                             }).html(g.Direction));
-                            f.append("方向，" + g.Distance + " 站 " + g.Distance * 3 + " 分钟");
+                            f.append("方向，" + g.Distance + " 站");
                         }
                     }
                     e.append(f);
@@ -155,6 +153,8 @@ function init() {
             lineColors = c.Lines;
             VirtualTransfers = c.VirtualTransfers;
             Transfers = c.Transfers;
+            console.log(VirtualTransfers)
+            console.log(Transfers)
             Stations.forEach(function(a) {
                 var c = $("<div>").html($("<span>", {
                     "class": "StationName"

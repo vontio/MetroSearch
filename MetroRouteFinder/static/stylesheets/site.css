@@ -2,7 +2,10 @@
     color:white;
     background-color:black;
     }
-.direction{
+.Direction{
+    font-weight:bold;
+    }
+.StationName{
     font-weight:bold;
     }
 a.CityList{
