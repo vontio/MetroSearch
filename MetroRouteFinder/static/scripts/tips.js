@@ -153,8 +153,6 @@ function init() {
             lineColors = c.Lines;
             VirtualTransfers = c.VirtualTransfers;
             Transfers = c.Transfers;
-            console.log(VirtualTransfers)
-            console.log(Transfers)
             Stations.forEach(function(a) {
                 var c = $("<div>").html($("<span>", {
                     "class": "StationName"
