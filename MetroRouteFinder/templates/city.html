@@ -56,10 +56,13 @@
 			<div class="panel panel-default">
 				<div id="heading-1" role="tab" class="panel-heading">
 					<h4 class="panel-title">
-					<a href="#collapse-1" role="button" data-toggle="collapse" data-parent="#path-1" aria-controls="collapse-1" class="collapsed" aria-expanded="false">步行到地铁站</a>
+					<a href="#collapse-1" role="button" data-toggle="collapse" data-parent="#path-1" aria-controls="collapse-1" aria-expanded="true">从当前位置到起点</a>   
+					<span class="routetype label label-success" onclick="search('Walking');">步行</span>
+					<span class="routetype label label-warning" onclick="search('Transfer');">公交</span>
+					<span class="routetype label label-danger" onclick="search('Driving');">驾车</span>
 					</h4>
 				</div>
-				<div id="collapse-1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-1" aria-expanded="false" style="height: 0px;">
+				<div id="collapse-1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading-1">
 					<div class="panel-body" id="walkMap">
 						<p>高德地图暂时不可用。</p>
 					</div>

@@ -1,76 +1,75 @@
 var nearestStation = [],
     earthLatLon,
-    marsLonLat, currentCity, map;
+    marsLonLat, currentCity = $("#CurrentCity").text(),
+    map, t;
 
 function showLocation(position) {
     eWJ = [position.coords.latitude, position.coords.longitude];
     $("#earth").html(eWJ[0] + " " + eWJ[1]);
+    initMap();
     toMars(eWJ);
 }
 
-function showPicture() {
+function initMap() {
     $("#walkMap").html("");
     map = new AMap.Map('walkMap', {
         resizeEnable: true,
         keyboardEnable: true
     });
+}
+
+function showPicture() {
     search("Walking");
 }
 
 function search(Mode) {
+    if (t) t.clear();
+
     transOptions = {
         map: map,
         city: currentCity,
         cityd: currentCity
     };
-    start = marsLonLat;
-    end = nearestStation[1];
     if (Mode === "Transfer") {
-        AMap.service('AMap.Transfer', function() {
-            var t = new AMap.Transfer(transOptions);
-            t.search(start, end);
-        });
+        t = new AMap.Transfer(transOptions);
+    } else if (Mode === "Driving") {
+        t = new AMap.Driving(transOptions);
     } else {
-        if (Mode === "Driving") {
-            AMap.service('AMap.Driving', function() {
-                var t = new AMap.Driving(transOptions);
-                t.search(start, end);
-            });
-        } else {
-            AMap.service('AMap.Walking', function() {
-                var t = new AMap.Walking(transOptions);
-                t.search(start, end);
-            });
-        }
+        t = new AMap.Walking(transOptions);
     }
+    t.search(marsLonLat, nearestStation[1]);
 }
 
 function obtainNeighbor() {
-    currentCity = $("#CurrentCity").text();
-    url = "https://restapi.amap.com/v3/place/around";
     dict = {
-        key: GaodeKey,
-        location: marsLonLat[0] + "," + marsLonLat[1],
-        keywords: "地铁站",
-        radius: 50000
+        type: '150500',
     };
     if (currentCity != "") {
         dict["city"] = currentCity;
     }
-    $.get(url, dict, function(data) {
-        pois = data["pois"]
+    var placeSearch = new AMap.PlaceSearch(dict);
+    var cpoint = [marsLonLat[0], marsLonLat[1]];
+    placeSearch.searchNearBy("地铁站", cpoint, 50000, function(status, result) {
+        pois = result["poiList"]["pois"];
         sN = pois[0]["name"].split("(")[0];
-        currentCity = pois[0]["cityname"].replace("市", "");
-        $("#demo").html("您当前位于");
-        $("#demo").append($("<a>", {
-            href: currentCity,
-            "class": "btn btn-info CityList"
-        }).html(currentCity));
-        $("#demo").append("，最近的地铁站是" + sN);
         $("#fromInput").val(sN);
         nearestStation.push(sN);
-        nearestStation.push(pois[0]["location"].split(","));
+        nearestStation.push([pois[0]["location"]["lng"], pois[0]["location"]["lat"]]);
         showPicture();
+    });
+}
+
+function obtainLocation() {
+    var placeSearch = new AMap.Geocoder();
+    var cpoint = [marsLonLat[0], marsLonLat[1]];
+    placeSearch.getAddress(cpoint, function(status, result) {
+        console.log(result["regeocode"]["addressComponent"]["city"]);
+        a = result["regeocode"]["addressComponent"]["city"].replace("市", "")
+        $("#demo").html("您当前位于");
+        $("#demo").append($("<a>", {
+            href: a,
+            "class": "btn btn-info CityList"
+        }).html(result["regeocode"]["formattedAddress"]));
     });
 }
 
@@ -83,7 +82,11 @@ function toMars(eWJ) {
     }, function(data) {
         marsLonLat = data["locations"].split(",");
         $("#mars").html(marsLonLat[1] + " " + marsLonLat[0]);
-        obtainNeighbor();
+        if (currentCity != "") {
+            obtainNeighbor();
+        } else {
+            obtainLocation();
+        }
     });
 }
 
