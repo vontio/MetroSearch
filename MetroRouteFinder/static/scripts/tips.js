@@ -44,18 +44,20 @@ function find() {
                         "换乘少": "primary",
                         "不出站": "warning"
                     };
+                h.html(g);
                 for (var b = 0; b < Modes[a].length; b++) {
                     var c = "info";
                     if (correspondence.hasOwnProperty(Modes[a][b])) {
                         c = correspondence[Modes[a][b]];
                     }
-                    g.append(
+                    h.append(" ")
+                    h.append(
                         $("<span>", {
                             "class": "routetype label label-" + c
                         }).html(Modes[a][b])
                     );
                 }
-                ListElement.append(f.html(h.html(g)));
+                ListElement.append(f.html(h));
                 var d = $("<div>", {
                         id: "collapse" + a,
                         "class": "panel-collapse collapse in",
