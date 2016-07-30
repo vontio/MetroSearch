@@ -61,7 +61,7 @@ def timeCalculation(lO, fromIndex, toIndex, ring=0):
     else:
         if ring != 0:
             dist = len(lO["Stations"]) - abs(dist)
-        time = abs(dist) * (lO["AvgTime"] if u"AvgTime" in lO else 1)
+        time = abs(dist) * (lO["AvgTime"] if u"AvgTime" in lO else 3)
     return time
 
 
