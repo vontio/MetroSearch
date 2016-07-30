@@ -7,40 +7,31 @@ except:
 
 
 def getLine(City, lineName):
-    rawJsonFile = dataProcess(City=City, Mode="rawJson")["Lines"]
-    for Line in rawJsonFile:
+    for Line in getRawJson(City)["Lines"]:
         if Line["Name"] == lineName:
             if "System" not in Line:
                 Line["System"] = City + u"地铁"
             return Line
-    return {}
 
 
 def getStation(City, stationName):
     for Station in dataProcess(City=City, Mode="allStations")[u"Stations"]:
         if Station[u"Name"] == stationName:
             return Station
-    return {}
 
 
 def sameLine(City, From, To, system=u"All"):
     Lines = []
     for Line in (set(getStation(City, From)["Lines"]) &
                  set(getStation(City, To)["Lines"])):
-        if system != u"All":
-            if getLine(City, Line)["System"] == system:
-                Lines.append({"Line": Line,
-                              "System": getLine(City, Line)["System"],
-                              "Distance": getDirection(
-                                  City, Line, From, To)[1],
-                              "Direction": getDirection(
-                                  City, Line, From, To)[0]})
-        else:
-            Lines.append(
-                {"Line": Line,
-                 "System": getLine(City, Line)["System"],
-                 "Distance": getDirection(City, Line, From, To)[1],
-                 "Direction": getDirection(City, Line, From, To)[0]})
+        System = getLine(City, Line)["System"]
+        if system == u"All" or System == system:
+            p = getDirection(City, Line, From, To)
+            Lines.append({"Line": Line,
+                          "System": System,
+                          "Direction": p[0],
+                          "Distance": p[1],
+                          "Time": p[2]})
     ClearedLine = []
     try:
         Minimum = Lines[0]["Distance"]
@@ -55,32 +46,55 @@ def sameLine(City, From, To, system=u"All"):
         return Lines
 
 
-def getDirection(City, lineName, From, To):
-    LineObject = getLine(City, lineName)
-    fromIndex = LineObject["Stations"].index(From)
-    toIndex = LineObject["Stations"].index(To)
-    k = toIndex - fromIndex
-    if (k == 0):
-        direction = u"同站出入"
-    elif u"Ring" in LineObject:
-        k *= LineObject[u"Ring"]
-        # Ring 如果为 1 代表自上到下为逆时针，反之为顺时针
-        LineLength = len(LineObject["Stations"]) / 2
-        if abs(k) < LineLength:
-            direction = u"逆时针" if k > 0 else u"顺时针"
-        elif abs(k) > LineLength:
-            direction = u"顺时针" if k > 0 else u"逆时针"
-        else:
-            direction = u"您随便坐"
-        k = min(abs(k), len(LineObject["Stations"]) - abs(k))
+def timeCalculation(lO, fromIndex, toIndex, ring=0):
+    dist = toIndex - fromIndex
+    if (dist > 0):
+        start, end = fromIndex, toIndex
     else:
-        direction = LineObject["Stations"][-1 if k > 0 else 0]
-    return [direction, abs(k)]
+        start, end = toIndex, fromIndex
+    if u"Time" in lO:
+        if ring == 0:
+            time = sum(lO[u"Time"][start:end])
+        else:
+            time = (sum(lO[u"Time"][end:]) +
+                    sum(lO[u"Time"][:start]))
+    else:
+        if ring != 0:
+            dist = len(lO["Stations"]) - abs(dist)
+        time = abs(dist) * (lO["AvgTime"] if u"AvgTime" in lO else 1)
+    return time
+
+
+def getDirection(City, lineName, From, To):
+    lO = getLine(City, lineName)
+    fromIndex = lO["Stations"].index(From)
+    toIndex = lO["Stations"].index(To)
+    k = toIndex - fromIndex
+    time = 0
+    if (k == 0):
+        direction, time = u"同站出入", 0
+    elif u"Ring" in lO:
+        LineLength = len(lO["Stations"]) / 2
+        k = k * lO["Ring"]  # 1 代表逆时针 反之代表顺时针
+        # 这样一来 k > 0 代表逆时针方向；k < 0 代表顺时针方向
+        if abs(k) < LineLength:  # 小于一半原方向
+            direction = u"逆时针" if k > 0 else u"顺时针"
+            time = timeCalculation(lO, fromIndex, toIndex)
+            k = abs(k)
+        else:  # 反之反方向
+            direction = u"顺时针" if k > 0 else u"逆时针"
+            time = timeCalculation(lO, fromIndex, toIndex, 1)
+            k = len(lO["Stations"]) - abs(k)
+    else:
+        direction = lO["Stations"][-1 if toIndex > fromIndex else 0]
+        time = timeCalculation(lO, fromIndex, toIndex)
+        k = abs(k)
+    return [direction, k, time]
 
 
 def allStations(City):
     a, b, c, d = [], [], [], []  # 存储名称
-    rawK = dataProcess(City=City, Mode="rawJson")
+    rawK = getRawJson(City)
     rawJsonFile = rawK["Lines"]
     for Line in rawJsonFile:
         LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
@@ -131,18 +145,21 @@ def allStations(City):
 
 
 def Write_Distance(City, Mode):
-    filename = u"./cache/{City}_{Mode}_DistanceArray.dat".format(
-        City=City, Mode=Mode)
+    f = u"./cache/{City}_{Mode}_DistanceArray.dat".format(City=City, Mode=Mode)
     try:
-        k = pickle.load(open(filename, 'rb'))
+        k = pickle.load(open(f, 'rb'))
     except:
         k = Raw_Write_Distance(City, Mode)
-        pickle.dump(k, open(filename, "wb"), 1)
+        pickle.dump(k, open(f, "wb"), 1)
     return k
 
 
 def getInfoCard(City):
     return dataProcess(City=City, Mode="InfoCardArray")["InfoCard"]
+
+
+def getRawJson(City):
+    return dataProcess(City=City, Mode="rawJson")
 
 
 def Route_Find(Station_List, City, Mode="Normal"):
@@ -226,8 +243,8 @@ def generateDict(Paths, City, system="All"):
 
 
 def getRoute(City, From, To):
-    k = dataProcess("rawJson", City)
-    # b = [u"站数少", u"换乘少", u"测试"]
+    k = getRawJson(City)
+    # b = [u"站数少", u"换乘少", u"抽象测试", u"实际测试"]
     b = [u"站数少", u"换乘少"]
     if "VirtualTransfers" in k:
         b.append(u"不出站")
@@ -241,10 +258,8 @@ def getRoute(City, From, To):
         for system in Systems:
             c.append((u"一票到底", system, system))
     for item in c:
-        a = generateDict(Bulid_List(City, [From, To],
-                                    item[0], item[1]),
-                         City, item[2])
-        for element in a:
+        for element in generateDict(
+                Bulid_List(City, [From, To], item[0], item[1]), City, item[2]):
             if element["Lines"] != []:
                 if element not in routes:
                     routes.append(element)
@@ -255,7 +270,7 @@ def getRoute(City, From, To):
 
 
 def InfoCardArray(City):
-    JsonFile = dataProcess(City=City, Mode="rawJson")
+    JsonFile = getRawJson(City)
     InfoCard = []
     for Line in JsonFile["Lines"]:
         LineSystem = Line[u'System'] if "System" in Line else City + u"地铁"
@@ -319,23 +334,30 @@ def InfoCardArray(City):
 
 def Raw_Write_Distance(City, Mode):
     ConfigFile = json.load(open("./config.json"))["Mode"]
-    distanceTable = ConfigFile[Mode if Mode in ConfigFile else u"普通"]
+    if Mode in ConfigFile:
+        distanceTable = ConfigFile[Mode]
+    elif Mode[-2:] == u"测试":
+        distanceTable = ConfigFile[u"测试"]
+    else:
+        distanceTable = ConfigFile[u"普通"]
     Array = dataProcess(City=City, Mode="InfoCardArray")["Array"]
     Stations_Count = Array["Stations"]
-    Distance = [[distanceTable[u"无"]
+    Distance = [[ConfigFile[u"无"]
                  for j in range(Stations_Count)]
                 for i in range(Stations_Count)]
     for item in Array[u"Items"][u"同"]:
-        Distance[item[0]][item[1]] = distanceTable[u"同"]
+        Distance[item[0]][item[1]] = ConfigFile[u"同"]
     for item in Array[u"Items"][u"车"]:
-        Distance[item[0]][item[1]] = distanceTable[u"车"]
+        rawd = getDistance(City, min(item[0], item[1]))
+        Distance[item[0]][item[1]] = (
+            rawd if (rawd >= 0 and Mode != u"抽象测试") else ConfigFile[u"车"])
     for item in Array[u"Items"][u"换"]:
         Distance[item[0]][item[1]] = distanceTable[u"换"]
     for item in Array[u"Items"][u"转"]:
-        Distance[item[0]][item[1]] = distanceTable[u"无"] if (
+        Distance[item[0]][item[1]] = ConfigFile[u"无"] if (
             Mode == u"一票到底") else distanceTable[u"转"]
     for item in Array[u"Items"][u"虚"]:
-        Distance[item[0]][item[1]] = distanceTable[u"无"] if (
+        Distance[item[0]][item[1]] = ConfigFile[u"无"] if (
             Mode == u"不出站") else distanceTable[u"换"]
     length = Distance
     path = [[i for j in range(Stations_Count)] for i in range(Stations_Count)]
@@ -347,6 +369,17 @@ def Raw_Write_Distance(City, Mode):
                     length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
                     path[i][j] = path[k][j]  # 并将路径设为K点
     return [length, path]
+
+
+def getDistance(City, id):
+    item = getInfoCard(City)[id]
+    Line = getLine(City, item["Line"])
+    if "Time" in Line:
+        index = Line["Stations"].index(item["Name"])
+        Name = Line["Time"][index]
+    else:
+        Name = Line["AverageTime"] if u"AverageTime" in Line else -1
+    return Name
 
 
 def dataProcess(Mode=u"InfoCardArray", City=u"Guangzhou"):

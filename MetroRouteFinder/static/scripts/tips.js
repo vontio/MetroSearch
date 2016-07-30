@@ -42,7 +42,9 @@ function find() {
                     correspondence = {
                         "站数少": "success",
                         "换乘少": "primary",
-                        "不出站": "warning"
+                        "不出站": "warning",
+                        "抽象测试": "danger",
+                        "实际测试": "danger"
                     };
                 h.html(g);
                 for (var b = 0; b < Modes[a].length; b++) {
@@ -94,7 +96,7 @@ function find() {
                                 "class": "Direction",
                                 id: pre + "Direction" + b
                             }).html(g.Direction));
-                            f.append("方向，" + g.Distance + " 站");
+                            f.append("方向，" + g.Distance + " 站 "+ Math.round(g.Time) +" 分钟");
                         }
                     }
                     e.append(f);

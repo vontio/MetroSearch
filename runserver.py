@@ -13,5 +13,5 @@ if __name__ == '__main__':
     PORT = 63876
     DEBUG = True
     context = ("C:\users\jason\JasonLee.test.crt", "C:\users\jason\JasonLee.test.key")
-    webbrowser.open("https://localhost:{p}".format(p=PORT), new=0, autoraise=True)
+    # webbrowser.open("https://localhost:{p}".format(p=PORT), new=0, autoraise=True)
     app.run(HOST, PORT, debug=DEBUG, ssl_context=context)
