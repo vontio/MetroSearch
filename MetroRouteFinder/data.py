@@ -145,13 +145,16 @@ def allStations(City):
 
 
 def Write_Distance(City, Mode):
-    f = u"./cache/{City}_{Mode}_DistanceArray.dat".format(City=City, Mode=Mode)
+    f = u"./cache/{City}_{Mode}_Length.dat".format(City=City, Mode=Mode)
+    g = u"./cache/{City}_{Mode}_Path.dat".format(City=City, Mode=Mode)
     try:
-        k = pickle.load(open(f, 'rb'))
+        All_Length = pickle.load(open(f, 'rb'))
+        All_Path = pickle.load(open(g, 'rb'))
     except:
-        k = Raw_Write_Distance(City, Mode)
-        pickle.dump(k, open(f, "wb"), 1)
-    return k
+        All_Length, All_Path = Raw_Write_Distance(City, Mode)
+        pickle.dump(All_Length, open(f, "wb"), 1)
+        pickle.dump(All_Path, open(g, "wb"), 1)
+    return All_Length, All_Path
 
 
 def getInfoCard(City):
@@ -176,14 +179,12 @@ def Route_Find(Station_List, City, Mode="Normal"):
             List.append(k)
         Length.append(All_Length[b[0]][b[1]])
         Path.append(List[::-1])
-    return [Length, Path]
+    return Length, Path
 
 
 def Print_Result(Station_List, City, Mode="Normal"):
-    Route = Route_Find(Station_List, City, Mode)
+    Length, Path = Route_Find(Station_List, City, Mode)
     InfoCard = getInfoCard(City)
-    Length = Route[0]
-    Path = Route[1]
     CleanedPath = []
     for i in xrange(len(Path)):
         b = Path[i]
@@ -245,7 +246,7 @@ def generateDict(Paths, City, system="All"):
 def getRoute(City, From, To):
     k = getRawJson(City)
     # b = [u"站数少", u"换乘少", u"抽象测试", u"实际测试"]
-    b = [u"站数少", u"换乘少"]
+    b = [u"站数少", u"换乘少", u"换乘多"]
     if "VirtualTransfers" in k:
         b.append(u"不出站")
     c = [(mode, mode, u"All") for mode in b]
@@ -368,7 +369,7 @@ def Raw_Write_Distance(City, Mode):
                 if (length[i][j] > length[i][k] + length[k][j]):
                     length[i][j] = length[i][k] + length[k][j]  # 则将既有路径更新
                     path[i][j] = path[k][j]  # 并将路径设为K点
-    return [length, path]
+    return length, path
 
 
 def getDistance(City, id):

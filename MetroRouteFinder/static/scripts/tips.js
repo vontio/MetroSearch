@@ -43,6 +43,7 @@ function find() {
                         "站数少": "success",
                         "换乘少": "primary",
                         "不出站": "warning",
+                        "换乘多": "danger",
                         "抽象测试": "danger",
                         "实际测试": "danger"
                     };
